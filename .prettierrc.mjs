@@ -1,0 +1,22 @@
+export default {
+  printWidth: 120,
+  tabWidth: 2,
+  trailingComma: "all",
+  singleQuote: false,
+  semi: true,
+  bracketSameLine: true,
+  importOrder: [
+    "^@styles/(.*)$",
+    "^@lib/(.*)$",
+    "^@schemas(.*)$",
+    "^@services/(.*)$",
+    "^@components/ui/(.*)$",
+    "^@components/partials/(.*)$",
+    "^@components/provider/(.*)$",
+    "^@components/(.*)$",
+    "^[./]",
+  ],
+  importOrderSeparation: true,
+  importOrderSortSpecifiers: true,
+  plugins: ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
+};
