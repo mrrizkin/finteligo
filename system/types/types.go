@@ -7,6 +7,7 @@ import (
 	"github.com/mrrizkin/finteligo/system/database"
 	"github.com/mrrizkin/finteligo/system/session"
 	"github.com/mrrizkin/finteligo/system/validator"
+	"github.com/mrrizkin/finteligo/third_party/langchain"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
 
@@ -33,4 +34,5 @@ type System struct {
 }
 
 type Library struct {
+	LangChain *langchain.LangChain
 }

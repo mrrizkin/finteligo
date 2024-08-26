@@ -10,6 +10,7 @@ import (
 	"github.com/mrrizkin/finteligo/system/session"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/system/validator"
+	"github.com/mrrizkin/finteligo/third_party/langchain"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
 
@@ -41,6 +42,9 @@ func Run() {
 	valid := validator.New()
 	serv := server.New(conf, log, sess)
 
+	lc := langchain.New(log, db)
+	lc.InitializeLLMs()
+
 	routes.Setup(&types.App{
 		App: serv.App,
 		System: &types.System{
@@ -50,7 +54,9 @@ func Run() {
 			Session:   sess,
 			Validator: valid,
 		},
-		Library: &types.Library{},
+		Library: &types.Library{
+			LangChain: lc,
+		},
 	})
 
 	log.Info().Msgf("Server is running on port %d", conf.PORT)

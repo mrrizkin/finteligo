@@ -3,8 +3,13 @@ import { z } from "zod";
 import { createResponseSchema } from "@schemas";
 
 export const playgroundPromptPayloadSchema = z.object({
-  name: z.string(),
-  age: z.number(),
+  model: z.string(),
+  message: z.string(),
+  temperature: z.number().nullable().optional(),
+  topP: z.number().nullable().optional(),
+  topK: z.number().nullable().optional(),
+  role: z.string().nullable().optional(),
+  content: z.string().nullable().optional(),
 });
 
 export const playgroundPromptResponseSchema = createResponseSchema(

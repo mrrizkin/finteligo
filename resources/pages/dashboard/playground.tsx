@@ -1,5 +1,9 @@
-import { Bird, CornerDownLeft, Mic, Paperclip, Rabbit, Settings, Turtle } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import llamaTokenizer from "llama-tokenizer-js";
+import { Bird, CornerDownLeft, Rabbit, Settings, Turtle } from "lucide-react";
+import * as React from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 import { toastValidation } from "@lib/utils";
 
@@ -23,20 +27,67 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@components/ui/drawer";
-import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { Textarea } from "@components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
 
 import Header from "@components/partials/header";
 
 export default function PlaygroundPage() {
+  const [model, setModel] = React.useState<string | null>(null);
+  const [message, setMessage] = React.useState<string | null>(null);
+  const [temperature, setTemperature] = React.useState<number | null>(null);
+  const [topP, setTopP] = React.useState<number | null>(null);
+  const [topK, setTopK] = React.useState<number | null>(null);
+  const [role, setRole] = React.useState<string | null>(null);
+  const [content, setContent] = React.useState<string | null>(null);
+
+  const [tokenLength, setTokenLength] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (!message) {
+      setTokenLength(0);
+    }
+
+    setTokenLength(llamaTokenizer.encode(message || "").length || 0);
+  }, [message]);
+
+  function onMessageChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setMessage(event.target.value);
+  }
+
+  function onTemperatureChange(value: number[]) {
+    setTemperature(Number((value[0] || 0) / 100));
+  }
+
+  function onTopPChange(value: number[]) {
+    setTopP(Number((value[0] || 0) / 100));
+  }
+
+  function onTopKChange(value: number[]) {
+    setTopK(Number((value[0] || 0) / 100));
+  }
+
+  function onContentChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setContent(event.target.value);
+  }
+
   function sendMessage() {
+    console.log("Sending message...", model, message, temperature, topP, topK, role, content);
+    if (!model || !message) {
+      toast.error("Please select a model and enter a message.");
+      return;
+    }
+
     toastValidation(
       prompt({
-        name: "John Doe",
-        age: 30,
+        model,
+        message,
+        temperature,
+        topP,
+        topK,
+        role,
+        content,
       }),
       {
         success(data) {
@@ -79,7 +130,7 @@ export default function PlaygroundPage() {
                 <legend className="-ml-1 px-1 text-sm font-medium">Settings</legend>
                 <div className="grid gap-3">
                   <Label htmlFor="model">Model</Label>
-                  <Select>
+                  <Select onValueChange={setModel}>
                     <SelectTrigger id="model" className="items-start [&_[data-description]]:hidden">
                       <SelectValue placeholder="Select a model" />
                     </SelectTrigger>
@@ -128,22 +179,34 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="temperature">Temperature</Label>
-                  <Input id="temperature" type="number" placeholder="0.4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Factual</span>
+                    <span className="text-xs text-muted-foreground">Creative</span>
+                  </div>
+                  <Slider defaultValue={[40]} max={100} step={5} onValueChange={onTemperatureChange} />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="top-p">Top P</Label>
-                  <Input id="top-p" type="number" placeholder="0.7" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">0.0</span>
+                    <span className="text-xs text-muted-foreground">1.0</span>
+                  </div>
+                  <Slider defaultValue={[40]} max={100} step={10} onValueChange={onTopPChange} />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="top-k">Top K</Label>
-                  <Input id="top-k" type="number" placeholder="0.0" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">0.0</span>
+                    <span className="text-xs text-muted-foreground">1.0</span>
+                  </div>
+                  <Slider defaultValue={[40]} max={100} step={10} onValueChange={onTopKChange} />
                 </div>
               </fieldset>
               <fieldset className="grid gap-6 rounded-lg border p-4">
                 <legend className="-ml-1 px-1 text-sm font-medium">Messages</legend>
                 <div className="grid gap-3">
                   <Label htmlFor="role">Role</Label>
-                  <Select defaultValue="system">
+                  <Select defaultValue="system" onValueChange={setRole}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
@@ -156,7 +219,7 @@ export default function PlaygroundPage() {
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="content">Content</Label>
-                  <Textarea id="content" placeholder="You are a..." />
+                  <Textarea id="content" placeholder="You are a..." onChange={onContentChange} />
                 </div>
               </fieldset>
             </form>
@@ -170,7 +233,7 @@ export default function PlaygroundPage() {
               <legend className="-ml-1 px-1 text-sm font-medium">Settings</legend>
               <div className="grid gap-3">
                 <Label htmlFor="model">Model</Label>
-                <Select>
+                <Select onValueChange={setModel}>
                   <SelectTrigger id="model" className="items-start [&_[data-description]]:hidden">
                     <SelectValue placeholder="Select a model" />
                   </SelectTrigger>
@@ -219,16 +282,28 @@ export default function PlaygroundPage() {
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="temperature">Temperature</Label>
-                <Input id="temperature" type="number" placeholder="0.4" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Factual</span>
+                  <span className="text-xs text-muted-foreground">Creative</span>
+                </div>
+                <Slider defaultValue={[40]} max={100} step={10} onValueChange={onTemperatureChange} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-3">
                   <Label htmlFor="top-p">Top P</Label>
-                  <Input id="top-p" type="number" placeholder="0.7" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">0.0</span>
+                    <span className="text-xs text-muted-foreground">1.0</span>
+                  </div>
+                  <Slider defaultValue={[40]} max={100} step={10} onValueChange={onTopPChange} />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="top-k">Top K</Label>
-                  <Input id="top-k" type="number" placeholder="0.0" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">0.0</span>
+                    <span className="text-xs text-muted-foreground">1.0</span>
+                  </div>
+                  <Slider defaultValue={[40]} max={100} step={10} onValueChange={onTopKChange} />
                 </div>
               </div>
             </fieldset>
@@ -236,7 +311,7 @@ export default function PlaygroundPage() {
               <legend className="-ml-1 px-1 text-sm font-medium">Messages</legend>
               <div className="grid gap-3">
                 <Label htmlFor="role">Role</Label>
-                <Select defaultValue="system">
+                <Select defaultValue="system" onValueChange={setRole}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
@@ -249,7 +324,12 @@ export default function PlaygroundPage() {
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="content">Content</Label>
-                <Textarea id="content" placeholder="You are a..." className="min-h-[9.5rem]" />
+                <Textarea
+                  id="content"
+                  placeholder="You are a..."
+                  className="min-h-[9.5rem]"
+                  onChange={onContentChange}
+                />
               </div>
             </fieldset>
           </form>
@@ -269,9 +349,14 @@ export default function PlaygroundPage() {
               id="message"
               placeholder="Type your message here..."
               className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
+              onChange={onMessageChange}
             />
             <div className="flex items-center p-3 pt-0">
-              <Tooltip>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span>{tokenLength}</span>
+                <span>tokens</span>
+              </div>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <Paperclip className="size-4" />
@@ -289,6 +374,7 @@ export default function PlaygroundPage() {
                 </TooltipTrigger>
                 <TooltipContent side="top">Use Microphone</TooltipContent>
               </Tooltip>
+              */}
               <Button type="submit" size="sm" className="ml-auto gap-1.5" onClick={sendMessage}>
                 Send Message
                 <CornerDownLeft className="size-3.5" />

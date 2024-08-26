@@ -11,20 +11,24 @@ func (h *Handlers) RolePermissionCreate(c *fiber.Ctx) error {
 	payload := new(models.RolePermission)
 	err := c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	rolePermission, err := h.rolePermissionService.Create(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed create role permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed create role permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -37,11 +41,11 @@ func (h *Handlers) RolePermissionCreate(c *fiber.Ctx) error {
 func (h *Handlers) RolePermissionFindAll(c *fiber.Ctx) error {
 	rolePermission, err := h.rolePermissionService.FindAll()
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get role permissions")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get role permissions",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -54,20 +58,20 @@ func (h *Handlers) RolePermissionFindAll(c *fiber.Ctx) error {
 func (h *Handlers) RolePermissionFindByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	rolePermission, err := h.rolePermissionService.FindByID(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get role permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get role permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -80,30 +84,34 @@ func (h *Handlers) RolePermissionFindByID(c *fiber.Ctx) error {
 func (h *Handlers) RolePermissionUpdate(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	payload := new(models.RolePermission)
 	err = c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	rolePermission, err := h.rolePermissionService.Update(uint(id), payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed update role permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed update role permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -116,20 +124,20 @@ func (h *Handlers) RolePermissionUpdate(c *fiber.Ctx) error {
 func (h *Handlers) RolePermissionDelete(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	err = h.rolePermissionService.Delete(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed delete role permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed delete role permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{

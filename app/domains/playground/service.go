@@ -1,15 +1,23 @@
 package playground
 
-func NewService(llm *Llm) *Service {
-	return &Service{llm}
+import "github.com/mrrizkin/finteligo/third_party/langchain"
+
+func NewService(lc *langchain.LangChain) *Service {
+	return &Service{
+		langchain: lc,
+	}
 }
 
-func (s *Service) Prompt(payload Prompt) *PromptResponse {
-
-	s.llm.Prompt(payload.Message)
+func (s *Service) Prompt(
+	token langchain.LangChainToken,
+	payload langchain.PromptPayload,
+) (*PromptResponse, error) {
+	result, err := s.langchain.Prompt(token, payload)
+	if err != nil {
+		return nil, err
+	}
 
 	return &PromptResponse{
-		Role:    payload.Role,
-		Content: payload.Content,
-	}
+		Answer: result,
+	}, nil
 }

@@ -11,20 +11,25 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 	payload := new(models.Role)
 	err := c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	role, err := h.roleService.Create(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed create role")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed create role",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -37,11 +42,11 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 func (h *Handlers) RoleFindAll(c *fiber.Ctx) error {
 	roles, err := h.roleService.FindAll()
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get roles")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get roles",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -54,20 +59,20 @@ func (h *Handlers) RoleFindAll(c *fiber.Ctx) error {
 func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	role, err := h.roleService.FindByID(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get role")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get role",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -80,30 +85,35 @@ func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
 func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	payload := new(models.Role)
 	err = c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	role, err := h.roleService.Update(uint(id), payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed update role")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed update role",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -116,20 +126,20 @@ func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
 func (h *Handlers) RoleDelete(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	err = h.roleService.Delete(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed delete role")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed delete role",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{

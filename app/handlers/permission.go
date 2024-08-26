@@ -11,20 +11,24 @@ func (h *Handlers) PermissionCreate(c *fiber.Ctx) error {
 	payload := new(models.Permission)
 	err := c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	permission, err := h.permissionService.Create(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed create permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed create permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -42,11 +46,11 @@ func (h *Handlers) PermissionFindAll(c *fiber.Ctx) error {
 
 	permissions, err = h.permissionService.FindAll()
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get permissions")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get permissions",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -64,20 +68,20 @@ func (h *Handlers) PermissionFindByID(c *fiber.Ctx) error {
 
 	id, err = c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	permission, err := h.permissionService.FindByID(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -90,30 +94,34 @@ func (h *Handlers) PermissionFindByID(c *fiber.Ctx) error {
 func (h *Handlers) PermissionUpdate(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	payload := new(models.Permission)
 	err = c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+			Code:    400,
+		}
+	}
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	permission, err := h.permissionService.Update(uint(id), payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed update permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed update permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -131,20 +139,20 @@ func (h *Handlers) PermissionDelete(c *fiber.Ctx) error {
 
 	id, err = c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	err = h.permissionService.Delete(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed delete permission")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed delete permission",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{

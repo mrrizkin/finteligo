@@ -11,20 +11,25 @@ func (h *Handlers) UserCreate(c *fiber.Ctx) error {
 	payload := new(models.User)
 	err := c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	user, err := h.userService.Create(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed create user")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed create user",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -37,11 +42,11 @@ func (h *Handlers) UserCreate(c *fiber.Ctx) error {
 func (h *Handlers) UserFindAll(c *fiber.Ctx) error {
 	users, err := h.userService.FindAll()
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get users")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get users",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -54,20 +59,20 @@ func (h *Handlers) UserFindAll(c *fiber.Ctx) error {
 func (h *Handlers) UserFindByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	user, err := h.userService.FindByID(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed get user")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed get user",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -80,30 +85,35 @@ func (h *Handlers) UserFindByID(c *fiber.Ctx) error {
 func (h *Handlers) UserUpdate(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	payload := new(models.User)
 	err = c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
+	}
+
+	validationError := h.System.Validator.MustValidate(payload)
+	if validationError != nil {
+		return validationError
 	}
 
 	user, err := h.userService.Update(uint(id), payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed update user")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed update user",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{
@@ -116,20 +126,20 @@ func (h *Handlers) UserUpdate(c *fiber.Ctx) error {
 func (h *Handlers) UserDelete(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
 			Message: "id not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	err = h.userService.Delete(uint(id))
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		h.System.Logger.Error().Err(err).Msg("failed delete user")
+		return &fiber.Error{
+			Code:    500,
 			Message: "failed delete user",
-			Debug:   err.Error(),
-		}, 500)
+		}
 	}
 
 	return h.SendJson(c, types.Response{

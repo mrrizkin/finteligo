@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/mrrizkin/finteligo/app/domains/models"
 	"github.com/mrrizkin/finteligo/app/domains/permission"
 	"github.com/mrrizkin/finteligo/app/domains/playground"
 	"github.com/mrrizkin/finteligo/app/domains/role"
@@ -14,10 +15,13 @@ import (
 type Handlers struct {
 	*types.App
 
-	playgroundService *playground.Service
+	modelsRepo    *models.Repo
+	modelsService *models.Service
 
 	permissionRepo    *permission.Repo
 	permissionService *permission.Service
+
+	playgroundService *playground.Service
 
 	rolePermissionRepo    *role_permission.Repo
 	rolePermissionService *role_permission.Service
@@ -32,11 +36,13 @@ type Handlers struct {
 func New(
 	app *types.App,
 ) *Handlers {
-
-	playgroundService := playground.NewService(&playground.Llm{})
+	modelsRepo := models.NewRepo(app.System.Database)
+	modelsService := models.NewService(modelsRepo, app.Library.LangChain)
 
 	permissionRepo := permission.NewRepo(app.System.Database)
 	permissionService := permission.NewService(permissionRepo)
+
+	playgroundService := playground.NewService(app.Library.LangChain)
 
 	rolePermissionRepo := role_permission.NewRepo(app.System.Database)
 	rolePermissionService := role_permission.NewService(rolePermissionRepo)
@@ -50,10 +56,13 @@ func New(
 	return &Handlers{
 		App: app,
 
-		playgroundService: playgroundService,
+		modelsRepo:    modelsRepo,
+		modelsService: modelsService,
 
 		permissionRepo:    permissionRepo,
 		permissionService: permissionService,
+
+		playgroundService: playgroundService,
 
 		rolePermissionRepo:    rolePermissionRepo,
 		rolePermissionService: rolePermissionService,

@@ -1,22 +1,20 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizkin/finteligo/app/domains/playground"
 	"github.com/mrrizkin/finteligo/system/types"
+	"github.com/mrrizkin/finteligo/third_party/langchain"
 )
 
 func (h *Handlers) Prompt(c *fiber.Ctx) error {
-	payload := new(playground.Prompt)
+	payload := new(playground.PromptPayload)
 	err := c.BodyParser(payload)
 	if err != nil {
-		return h.SendJson(c, types.Response{
-			Success: false,
+		return &fiber.Error{
+			Code:    400,
 			Message: "payload not valid",
-			Debug:   err.Error(),
-		}, 400)
+		}
 	}
 
 	validationError := h.System.Validator.MustValidate(payload)
@@ -24,14 +22,29 @@ func (h *Handlers) Prompt(c *fiber.Ctx) error {
 		return validationError
 	}
 
-	// pretty print payload
-	fmt.Printf("%#+v\n", *payload)
+	promptResponse, err := h.playgroundService.Prompt(
+		payload.Token,
+		langchain.PromptPayload{
+			Role:        payload.Role,
+			Content:     payload.Content,
+			Model:       payload.Model,
+			Temperature: payload.Temperature,
+			TopP:        payload.TopP,
+			TopK:        payload.TopK,
+			Message:     payload.Message,
+		},
+	)
 
-	// promptResponse := h.playgroundService.Prompt(*payload)
+	if err != nil {
+		return &fiber.Error{
+			Code:    500,
+			Message: "failed prompt",
+		}
+	}
 
 	return h.SendJson(c, types.Response{
 		Success: true,
 		Message: "success prompt",
-		// Data:    promptResponse,
+		Data:    promptResponse,
 	})
 }
