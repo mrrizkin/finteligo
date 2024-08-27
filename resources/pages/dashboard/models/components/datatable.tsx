@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   ColumnDef,
   PaginationState,
@@ -14,6 +12,9 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { Models } from "@schemas/models";
+
+import { Button } from "@components/ui/button";
+import { Switch } from "@components/ui/switch";
 
 import { DataTableColumnHeader } from "@components/partials/data-table-column-header";
 

@@ -11,13 +11,11 @@ func NewService(lc *langchain.LangChain) *Service {
 func (s *Service) Prompt(
 	token langchain.LangChainToken,
 	payload langchain.PromptPayload,
-) (*PromptResponse, error) {
-	result, err := s.langchain.Prompt(token, payload)
+) error {
+	err := s.langchain.Prompt(token, payload)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &PromptResponse{
-		Answer: result,
-	}, nil
+	return nil
 }

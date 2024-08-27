@@ -1,14 +1,17 @@
-import { Slider } from "@/components/ui/slider";
-import * as queries from "@hooks/queries";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import llamaTokenizer from "llama-tokenizer-js";
-import { CornerDownLeft, Settings } from "lucide-react";
+import { CheckIcon, CornerDownLeft, Settings } from "lucide-react";
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
-import { toastValidation } from "@lib/utils";
+import { cn } from "@lib/utils";
+
+import { Models } from "@schemas/models";
 
 import * as playgroundService from "@services/playground";
+
+import * as queries from "@hooks/queries";
 
 import { Badge } from "@components/ui/badge";
 import {
@@ -20,6 +23,7 @@ import {
   BreadcrumbSeparator,
 } from "@components/ui/breadcrumb";
 import { Button } from "@components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import {
   Drawer,
   DrawerContent,
@@ -29,7 +33,9 @@ import {
   DrawerTrigger,
 } from "@components/ui/drawer";
 import { Label } from "@components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+import { Slider } from "@components/ui/slider";
 import { Textarea } from "@components/ui/textarea";
 
 import Header from "@components/partials/header";
@@ -43,13 +49,16 @@ export default function PlaygroundPage() {
   const [chatHistory, setChatHistory] = React.useState<ChatMessage[]>([]);
   const { data: response } = queries.useModels();
 
-  const [model, setModel] = React.useState<string | null>(null);
+  const [model, setModel] = React.useState<Models | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
+  const [assistantMessage, setAssistantMessage] = React.useState<string | null>(null);
   const [temperature, setTemperature] = React.useState<number | null>(null);
   const [topP, setTopP] = React.useState<number | null>(null);
   const [topK, setTopK] = React.useState<number | null>(null);
   const [role, setRole] = React.useState<string | null>(null);
   const [content, setContent] = React.useState<string | null>(null);
+
+  const [modelOpen, setModelOpen] = React.useState(false);
 
   const [tokenLength, setTokenLength] = React.useState<number>(0);
 
@@ -97,29 +106,36 @@ export default function PlaygroundPage() {
 
     setMessage("");
 
-    toastValidation(
-      playgroundService.prompt({
-        model,
+    playgroundService.prompt({
+      payload: {
+        model: model.model,
         message,
         temperature,
         topP,
         topK,
         role,
         content,
-        token: model,
-      }),
-      {
-        success(data) {
+        token: model.token,
+      },
+      stream(value) {
+        setAssistantMessage((prevAssistantMessage) => (prevAssistantMessage || "") + value);
+      },
+      done() {
+        setAssistantMessage((finalAssistantMessage) => {
           setChatHistory((prevChatHistory) => [
             ...prevChatHistory,
             {
               role: "assistant",
-              content: data.data?.answer || "No answer provided.",
+              content: finalAssistantMessage || "No answer provided.",
             },
           ]);
-        },
+          return "";
+        });
       },
-    );
+      error(error) {
+        toast.error(error);
+      },
+    });
   }
 
   return (
@@ -155,25 +171,54 @@ export default function PlaygroundPage() {
                 <legend className="-ml-1 px-1 text-sm font-medium">Settings</legend>
                 <div className="grid gap-3">
                   <Label htmlFor="model">Model</Label>
-                  <Select onValueChange={setModel}>
-                    <SelectTrigger id="model" className="items-start [&_[data-description]]:hidden">
-                      <SelectValue placeholder="Select a model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {response?.data?.data?.map((model) => (
-                        <SelectItem key={model.id} value={model.token}>
+                  <Popover open={modelOpen} onOpenChange={setModelOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="justify-between">
+                        {model ? (
                           <div className="flex items-start gap-3 text-muted-foreground">
                             <div className="grid gap-0.5">
-                              <p>{model.model}</p>
-                              <p className="text-xs" data-description>
-                                {model.provider}
+                              <p className="text-foreground">
+                                {model.model}
+                                <span className="text-muted-foreground">({model.provider})</span>
                               </p>
                             </div>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        ) : (
+                          "Select model..."
+                        )}
+                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search model..." className="h-9" />
+                        <CommandList>
+                          <CommandEmpty>No model found.</CommandEmpty>
+                          <CommandGroup>
+                            {(response?.data.data || []).map((m) => (
+                              <CommandItem
+                                key={m.token}
+                                value={m.token}
+                                onSelect={() => {
+                                  setModel(m);
+                                  setModelOpen(false);
+                                }}>
+                                <div className="flex items-start gap-3 text-muted-foreground">
+                                  <div className="grid gap-0.5">
+                                    <p>{m.model}</p>
+                                    <p className="text-xs" data-description>
+                                      {m.provider}
+                                    </p>
+                                  </div>
+                                </div>
+                                <CheckIcon className={cn("ml-auto h-4 w-4", model ? "opacity-100" : "opacity-0")} />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="temperature">Temperature</Label>
@@ -231,25 +276,53 @@ export default function PlaygroundPage() {
               <legend className="-ml-1 px-1 text-sm font-medium">Settings</legend>
               <div className="grid gap-3">
                 <Label htmlFor="model">Model</Label>
-                <Select onValueChange={setModel}>
-                  <SelectTrigger id="model" className="items-start [&_[data-description]]:hidden">
-                    <SelectValue placeholder="Select a model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {response?.data?.data?.map((model) => (
-                      <SelectItem key={model.id} value={model.token}>
+                <Popover open={modelOpen} onOpenChange={setModelOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" className="justify-between">
+                      {model ? (
                         <div className="flex items-start gap-3 text-muted-foreground">
                           <div className="grid gap-0.5">
-                            <p className="text-foreground">{model.model}</p>
-                            <p className="text-xs" data-description>
-                              {model.provider}
+                            <p className="text-foreground">
+                              {model.model} <span className="text-muted-foreground">({model.provider})</span>
                             </p>
                           </div>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      ) : (
+                        "Select model..."
+                      )}
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[200px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search model..." className="h-9" />
+                      <CommandList>
+                        <CommandEmpty>No model found.</CommandEmpty>
+                        <CommandGroup>
+                          {(response?.data.data || []).map((m) => (
+                            <CommandItem
+                              key={m.token}
+                              value={m.token}
+                              onSelect={() => {
+                                setModel(m);
+                                setModelOpen(false);
+                              }}>
+                              <div className="flex items-start gap-3 text-muted-foreground">
+                                <div className="grid gap-0.5">
+                                  <p>{m.model}</p>
+                                  <p className="text-xs" data-description>
+                                    {m.provider}
+                                  </p>
+                                </div>
+                              </div>
+                              <CheckIcon className={cn("ml-auto h-4 w-4", model ? "opacity-100" : "opacity-0")} />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="temperature">Temperature</Label>
@@ -323,6 +396,12 @@ export default function PlaygroundPage() {
                     <p className="max-w-[80%] text-sm">{chat.content}</p>
                   </div>
                 ),
+              )}
+              {assistantMessage && (
+                <div className="flex items-start justify-start gap-2">
+                  <Badge variant="default">Assistant</Badge>
+                  <p className="max-w-[80%] text-sm">{assistantMessage}</p>
+                </div>
               )}
             </div>
           </div>

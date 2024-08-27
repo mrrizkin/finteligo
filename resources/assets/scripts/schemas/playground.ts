@@ -25,3 +25,9 @@ export const playgroundPromptResponseSchema = createResponseSchema(
 
 export type PlaygroundPromptPayload = z.infer<typeof playgroundPromptPayloadSchema>;
 export type PlaygroundPromptResponse = z.infer<typeof playgroundPromptResponseSchema>;
+export type PromptRequestOptions = {
+  payload?: PlaygroundPromptPayload;
+  stream?: (data: string) => void;
+  done?: () => void;
+  error?: (error: string) => void;
+};

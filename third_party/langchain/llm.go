@@ -3,7 +3,6 @@ package langchain
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic"
@@ -24,15 +23,15 @@ type LLM struct {
 }
 
 type PromptPayload struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-
+	Role        string  `json:"role"`
+	Content     string  `json:"content"`
 	Model       string  `json:"model"       validate:"required"`
 	Temperature float64 `json:"temperature"`
 	TopP        float64 `json:"top_p"`
 	TopK        int     `json:"top_k"`
-
-	Message string `json:"message" validate:"required"`
+	Message     string  `json:"message" validate:"required"`
+	StreamFunc  *func(ctx context.Context, chunk []byte) error
+	Channel     chan string
 }
 
 func NewLLM(provider string, token LangChainToken) *LLM {
@@ -42,7 +41,7 @@ func NewLLM(provider string, token LangChainToken) *LLM {
 	}
 }
 
-func (llm *LLM) Prompt(prompt PromptPayload) (string, error) {
+func (llm *LLM) Prompt(prompt PromptPayload) error {
 	switch llm.Provider {
 	case "ollama":
 		return llm.promptOllama(prompt)
@@ -51,35 +50,49 @@ func (llm *LLM) Prompt(prompt PromptPayload) (string, error) {
 	case "openai":
 		return llm.promptOpenai(prompt)
 	default:
-		return "", ErrInvalidProvider
+		return ErrInvalidProvider
 	}
 }
 
-func (llm *LLM) promptOllama(prompt PromptPayload) (string, error) {
+func (llm *LLM) promptOllama(prompt PromptPayload) error {
 	ctx := context.Background()
+
+	options := make([]llms.CallOption, 0)
+
+	if prompt.Temperature != 0 {
+		options = append(options, llms.WithTemperature(prompt.Temperature))
+	}
+
+	if prompt.TopP != 0 {
+		options = append(options, llms.WithTopP(prompt.TopP))
+	}
+
+	if prompt.TopK != 0 {
+		options = append(options, llms.WithTopK(prompt.TopK))
+	}
+
+	if prompt.StreamFunc != nil {
+		options = append(options, llms.WithStreamingFunc(*prompt.StreamFunc))
+	}
+
 	completion, err := llms.GenerateFromSinglePrompt(
 		ctx,
 		llm.ollamaLLM,
 		prompt.Message,
-		llms.WithTemperature(prompt.Temperature),
-		llms.WithTopP(prompt.TopP),
-		llms.WithTopK(prompt.TopK),
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-			fmt.Printf("Received chunk: %s\n", string(chunk))
-			return nil
-		}),
+		options...,
 	)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return completion, nil
+	prompt.Channel <- completion
+	return nil
 }
 
-func (llm *LLM) promptAnthropic(prompt PromptPayload) (string, error) {
-	return "", nil
+func (llm *LLM) promptAnthropic(prompt PromptPayload) error {
+	return nil
 }
 
-func (llm *LLM) promptOpenai(prompt PromptPayload) (string, error) {
-	return "", nil
+func (llm *LLM) promptOpenai(prompt PromptPayload) error {
+	return nil
 }

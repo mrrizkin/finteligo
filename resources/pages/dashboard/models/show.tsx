@@ -1,4 +1,4 @@
-import { Models } from "@/assets/scripts/schemas/models";
+import { Models } from "@schemas/models";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Input } from "@components/ui/input";

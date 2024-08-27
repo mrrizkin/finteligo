@@ -8,13 +8,12 @@ import pageRouter from "vite-plugin-pages";
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./resources"),
       "@styles": path.resolve(__dirname, "./resources/assets/styles"),
-      "@scripts": path.resolve(__dirname, "./resources/assets/scripts"),
       "@lib": path.resolve(__dirname, "./resources/assets/scripts/lib"),
       "@schemas": path.resolve(__dirname, "./resources/assets/scripts/schemas"),
       "@hooks": path.resolve(__dirname, "./resources/assets/scripts/hooks"),
       "@services": path.resolve(__dirname, "./resources/assets/scripts/services"),
+      "@scripts": path.resolve(__dirname, "./resources/assets/scripts"),
       "@components": path.resolve(__dirname, "./resources/components"),
       "@pages": path.resolve(__dirname, "./resources/pages"),
     },

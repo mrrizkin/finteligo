@@ -22,10 +22,10 @@ func New(logger *logger.Logger, db *database.Database) *LangChain {
 	}
 }
 
-func (lc *LangChain) Prompt(token LangChainToken, prompt PromptPayload) (string, error) {
+func (lc *LangChain) Prompt(token LangChainToken, prompt PromptPayload) error {
 	llm, err := lc.store.GetLLM(token)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	return llm.Prompt(prompt)

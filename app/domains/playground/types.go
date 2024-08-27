@@ -10,7 +10,3 @@ type PromptPayload struct {
 	langchain.PromptPayload
 	Token langchain.LangChainToken `json:"token"`
 }
-
-type PromptResponse struct {
-	Answer string `json:"answer"`
-}
