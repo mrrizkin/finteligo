@@ -10,6 +10,7 @@ export default {
     "^@lib/(.*)$",
     "^@schemas(.*)$",
     "^@services/(.*)$",
+    "^@hooks/(.*)$",
     "^@components/ui/(.*)$",
     "^@components/partials/(.*)$",
     "^@components/provider/(.*)$",

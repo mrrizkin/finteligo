@@ -33,7 +33,8 @@ func (h *Handlers) UserCreate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success create user",
 		Data:    user,
 	})
@@ -50,7 +51,8 @@ func (h *Handlers) UserFindAll(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get users",
 		Data:    users,
 	})
@@ -76,7 +78,8 @@ func (h *Handlers) UserFindByID(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get user",
 		Data:    user,
 	})
@@ -117,7 +120,8 @@ func (h *Handlers) UserUpdate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success update user",
 		Data:    user,
 	})
@@ -143,7 +147,8 @@ func (h *Handlers) UserDelete(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success delete user",
 	})
 }

@@ -1,8 +1,11 @@
 package langchain
 
 import (
+	"context"
 	"errors"
+	"fmt"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -53,7 +56,24 @@ func (llm *LLM) Prompt(prompt PromptPayload) (string, error) {
 }
 
 func (llm *LLM) promptOllama(prompt PromptPayload) (string, error) {
-	return "", nil
+	ctx := context.Background()
+	completion, err := llms.GenerateFromSinglePrompt(
+		ctx,
+		llm.ollamaLLM,
+		prompt.Message,
+		llms.WithTemperature(prompt.Temperature),
+		llms.WithTopP(prompt.TopP),
+		llms.WithTopK(prompt.TopK),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Printf("Received chunk: %s\n", string(chunk))
+			return nil
+		}),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return completion, nil
 }
 
 func (llm *LLM) promptAnthropic(prompt PromptPayload) (string, error) {

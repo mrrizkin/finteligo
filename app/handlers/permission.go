@@ -32,7 +32,8 @@ func (h *Handlers) PermissionCreate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success create permission",
 		Data:    permission,
 	})
@@ -54,7 +55,8 @@ func (h *Handlers) PermissionFindAll(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get permissions",
 		Data:    permissions,
 	})
@@ -85,7 +87,8 @@ func (h *Handlers) PermissionFindByID(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get permission",
 		Data:    permission,
 	})
@@ -125,7 +128,8 @@ func (h *Handlers) PermissionUpdate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success update permission",
 		Data:    permission,
 	})
@@ -156,7 +160,8 @@ func (h *Handlers) PermissionDelete(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success delete permission",
 	})
 }

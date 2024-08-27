@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/mrrizkin/finteligo/app/models"
+	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
 )
 
@@ -14,6 +15,7 @@ func NewService(repo *Repo, lc *langchain.LangChain) *Service {
 
 func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLLM, error) {
 	err := s.langchain.AddLLM(langchain.AddLLMParams{
+		UserID:   langChainLLM.UserID,
 		Token:    langChainLLM.Token,
 		Model:    langChainLLM.Model,
 		Provider: langChainLLM.Provider,
@@ -32,13 +34,23 @@ func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLL
 	return lcLLM, nil
 }
 
-func (s *Service) FindAll() ([]models.LangChainLLM, error) {
-	langChainLLMs, err := s.repo.FindAll()
+func (s *Service) FindAll(
+	pagination types.Pagination,
+) (*PaginatedModels, error) {
+	langChainLLMs, err := s.repo.FindAll(pagination)
 	if err != nil {
 		return nil, err
 	}
 
-	return langChainLLMs, nil
+	langChainLLMsCount, err := s.repo.FindAllCount()
+	if err != nil {
+		return nil, err
+	}
+
+	return &PaginatedModels{
+		Result: langChainLLMs,
+		Total:  int(langChainLLMsCount),
+	}, nil
 }
 
 func (s *Service) FindByID(id uint) (*models.LangChainLLM, error) {

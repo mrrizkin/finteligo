@@ -26,7 +26,18 @@ export type Schema = {
 
 export type ErrorResponseSchema = z.infer<typeof errorResponseSchema>;
 
+export type StatusResponseSchema = z.infer<typeof statusResponseSchema>;
+
 export const errorResponseSchema = z.object({ detail: z.string().optional() }).merge(createStatusResponseSchema());
+
+export const generalModelSchema = z.object({
+  id: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().nullable(),
+});
+
+export const statusResponseSchema = createStatusResponseSchema();
 
 function createStatusResponseSchema() {
   return z.object({

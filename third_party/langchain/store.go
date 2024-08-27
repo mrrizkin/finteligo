@@ -26,6 +26,7 @@ func NewStore(logger *logger.Logger) *Store {
 }
 
 type AddLLMParams struct {
+	UserID   uint
 	Token    LangChainToken
 	Model    string
 	Provider string

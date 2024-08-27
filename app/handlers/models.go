@@ -7,8 +7,8 @@ import (
 	"github.com/mrrizkin/finteligo/system/types"
 )
 
-func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
-	payload := new(models.Role)
+func (h *Handlers) ModelsCreate(c *fiber.Ctx) error {
+	payload := new(models.LangChainLLM)
 	err := c.BodyParser(payload)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
@@ -17,50 +17,58 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 			Message: "payload not valid",
 		}
 	}
-
 	validationError := h.System.Validator.MustValidate(payload)
 	if validationError != nil {
 		return validationError
 	}
 
-	role, err := h.roleService.Create(payload)
+	if payload.UserID == 0 {
+		payload.UserID = 1
+	}
+
+	models, err := h.modelsService.Create(payload)
 	if err != nil {
-		h.System.Logger.Error().Err(err).Msg("failed create role")
+		h.System.Logger.Error().Err(err).Msg("failed create models")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed create role",
+			Message: "failed create models",
 		}
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
-		Message: "success create role",
-		Data:    role,
+		Message: "success create models",
+		Data:    models,
 	})
 }
 
-func (h *Handlers) RoleFindAll(c *fiber.Ctx) error {
-	roles, err := h.roleService.FindAll()
+func (h *Handlers) ModelsFindAll(c *fiber.Ctx) error {
+	pagination := h.GetPaginationQuery(c)
+	modelss, err := h.modelsService.FindAll(pagination)
 	if err != nil {
-		h.System.Logger.Error().Err(err).Msg("failed get roles")
+		h.System.Logger.Error().Err(err).Msg("failed get modelss")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed get roles",
+			Message: "failed get modelss",
 		}
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
-		Message: "success get roles",
-		Data:    roles,
+		Message: "success get modelss",
+		Data:    modelss.Result,
+		Meta: types.PaginationMeta{
+			Page:      pagination.Page,
+			PerPage:   pagination.PerPage,
+			Total:     modelss.Total,
+			PageCount: modelss.Total / pagination.PerPage,
+		},
 	})
 }
 
-func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
+func (h *Handlers) ModelsFindByID(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse id")
@@ -70,25 +78,30 @@ func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
 		}
 	}
 
-	role, err := h.roleService.FindByID(uint(id))
+	models, err := h.modelsService.FindByID(uint(id))
 	if err != nil {
-		h.System.Logger.Error().Err(err).Msg("failed get role")
+		if err.Error() == "record not found" {
+			return &fiber.Error{
+				Code:    404,
+				Message: "models not found",
+			}
+		}
+		h.System.Logger.Error().Err(err).Msg("failed get models")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed get role",
+			Message: "failed get models",
 		}
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
-		Message: "success get role",
-		Data:    role,
+		Message: "success get models",
+		Data:    models,
 	})
 }
 
-func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
+func (h *Handlers) ModelsUpdate(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse id")
@@ -98,41 +111,44 @@ func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
 		}
 	}
 
-	payload := new(models.Role)
+	payload := new(models.LangChainLLM)
 	err = c.BodyParser(payload)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
 		return &fiber.Error{
-			Code:    400,
 			Message: "payload not valid",
+			Code:    400,
 		}
 	}
-
 	validationError := h.System.Validator.MustValidate(payload)
 	if validationError != nil {
 		return validationError
 	}
 
-	role, err := h.roleService.Update(uint(id), payload)
+	models, err := h.modelsService.Update(uint(id), payload)
 	if err != nil {
-		h.System.Logger.Error().Err(err).Msg("failed update role")
+		h.System.Logger.Error().Err(err).Msg("failed update models")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed update role",
+			Message: "failed update models",
 		}
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
-		Message: "success update role",
-		Data:    role,
+		Message: "success update models",
+		Data:    models,
 	})
 }
 
-func (h *Handlers) RoleDelete(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+func (h *Handlers) ModelsDelete(c *fiber.Ctx) error {
+	var (
+		err error
+		id  int
+	)
+
+	id, err = c.ParamsInt("id")
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse id")
 		return &fiber.Error{
@@ -141,19 +157,18 @@ func (h *Handlers) RoleDelete(c *fiber.Ctx) error {
 		}
 	}
 
-	err = h.roleService.Delete(uint(id))
+	err = h.modelsService.Delete(uint(id))
 	if err != nil {
-		h.System.Logger.Error().Err(err).Msg("failed delete role")
+		h.System.Logger.Error().Err(err).Msg("failed delete models")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed delete role",
+			Message: "failed delete models",
 		}
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
-		Message: "success delete role",
+		Message: "success delete models",
 	})
 }

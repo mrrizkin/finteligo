@@ -32,7 +32,9 @@ func (h *Handlers) RolePermissionCreate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+
+		Status:  "success",
+		Title:   "Success",
 		Message: "success create role permission",
 		Data:    rolePermission,
 	})
@@ -49,7 +51,9 @@ func (h *Handlers) RolePermissionFindAll(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get role permissions",
 		Data:    rolePermission,
 	})
@@ -75,7 +79,9 @@ func (h *Handlers) RolePermissionFindByID(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+
+		Status:  "success",
+		Title:   "Success",
 		Message: "success get role permission",
 		Data:    rolePermission,
 	})
@@ -115,7 +121,9 @@ func (h *Handlers) RolePermissionUpdate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+
+		Status:  "success",
+		Title:   "Success",
 		Message: "success update role permission",
 		Data:    rolePermission,
 	})
@@ -141,7 +149,9 @@ func (h *Handlers) RolePermissionDelete(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+
+		Status:  "success",
+		Title:   "Success",
 		Message: "success delete role permission",
 	})
 }

@@ -12,10 +12,24 @@ import (
 )
 
 type Response struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Debug   string      `json:"debug"`
-	Data    interface{} `json:"data"`
+	Title   string         `json:"title"`
+	Status  string         `json:"status"`
+	Message string         `json:"message"`
+	Debug   string         `json:"debug"`
+	Data    interface{}    `json:"data"`
+	Meta    PaginationMeta `json:"meta"`
+}
+
+type Pagination struct {
+	Page    int `json:"page"`
+	PerPage int `json:"per_page"`
+}
+
+type PaginationMeta struct {
+	Page      int `json:"page"`
+	PerPage   int `json:"per_page"`
+	Total     int `json:"total"`
+	PageCount int `json:"page_count"`
 }
 
 type App struct {

@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { createResponseSchema } from "@schemas";
 
+/** ================================ MODEL ================================= **/
+
+/** ========================== PAYLOAD & RESPONSE ========================== **/
+
 export const playgroundPromptPayloadSchema = z.object({
   model: z.string(),
   message: z.string(),
@@ -10,11 +14,12 @@ export const playgroundPromptPayloadSchema = z.object({
   topK: z.number().nullable().optional(),
   role: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
+  token: z.string().nullable().optional(),
 });
 
 export const playgroundPromptResponseSchema = createResponseSchema(
   z.object({
-    message: z.string(),
+    answer: z.string(),
   }),
 );
 

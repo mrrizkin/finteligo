@@ -13,6 +13,7 @@ export default defineConfig({
       "@scripts": path.resolve(__dirname, "./resources/assets/scripts"),
       "@lib": path.resolve(__dirname, "./resources/assets/scripts/lib"),
       "@schemas": path.resolve(__dirname, "./resources/assets/scripts/schemas"),
+      "@hooks": path.resolve(__dirname, "./resources/assets/scripts/hooks"),
       "@services": path.resolve(__dirname, "./resources/assets/scripts/services"),
       "@components": path.resolve(__dirname, "./resources/components"),
       "@pages": path.resolve(__dirname, "./resources/pages"),
@@ -26,6 +27,7 @@ export default defineConfig({
     react(),
     pageRouter({
       pagesDir: "resources/pages",
+      exclude: ["**/components/**/*"],
     }),
   ],
 });

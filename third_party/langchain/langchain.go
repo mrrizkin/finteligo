@@ -33,6 +33,7 @@ func (lc *LangChain) Prompt(token LangChainToken, prompt PromptPayload) (string,
 
 func (lc *LangChain) AddLLM(params AddLLMParams) error {
 	storedLLM := models.LangChainLLM{
+		UserID:   params.UserID,
 		Token:    params.Token,
 		Model:    params.Model,
 		Provider: params.Provider,
@@ -42,7 +43,7 @@ func (lc *LangChain) AddLLM(params AddLLMParams) error {
 		Enabled:  true,
 	}
 
-	err := lc.db.Create(storedLLM).Error
+	err := lc.db.Create(&storedLLM).Error
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func (lc *LangChain) AddLLM(params AddLLMParams) error {
 		storedLLM.Status = "error"
 		storedLLM.Enabled = false
 		storedLLM.Error = err.Error()
-		err := lc.db.Save(storedLLM).Error
+		err := lc.db.Save(&storedLLM).Error
 		if err != nil {
 			lc.logger.Error().Err(err).Msg("failed to update stored LLM")
 			return err
@@ -62,7 +63,7 @@ func (lc *LangChain) AddLLM(params AddLLMParams) error {
 	storedLLM.Status = "ok"
 	storedLLM.Enabled = true
 	storedLLM.Error = ""
-	err = lc.db.Save(storedLLM).Error
+	err = lc.db.Save(&storedLLM).Error
 	if err != nil {
 		lc.logger.Error().Err(err).Msg("failed to update stored LLM")
 		return err
@@ -94,6 +95,7 @@ func (lc *LangChain) RemoveLLM(token LangChainToken) error {
 }
 
 func (lc *LangChain) InitializeLLMs() error {
+	lc.logger.Info().Msg("initializing LLMs")
 	storedLLMs := make([]models.LangChainLLM, 0)
 	err := lc.db.Find(&storedLLMs).
 		Where("enabled = ?", true).
@@ -103,6 +105,7 @@ func (lc *LangChain) InitializeLLMs() error {
 	}
 
 	for _, storedLLM := range storedLLMs {
+		lc.logger.Info().Msgf("initializing LLM: %s", storedLLM.Token)
 		err = lc.store.AddLLM(AddLLMParams{
 			Token:    storedLLM.Token,
 			Model:    storedLLM.Model,
@@ -131,5 +134,6 @@ func (lc *LangChain) InitializeLLMs() error {
 		}
 	}
 
+	lc.logger.Info().Msg("LLMs initialized")
 	return nil
 }

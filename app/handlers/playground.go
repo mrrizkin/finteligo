@@ -36,6 +36,7 @@ func (h *Handlers) Prompt(c *fiber.Ctx) error {
 	)
 
 	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed prompt")
 		return &fiber.Error{
 			Code:    500,
 			Message: "failed prompt",
@@ -43,7 +44,8 @@ func (h *Handlers) Prompt(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-		Success: true,
+		Status:  "success",
+		Title:   "Success",
 		Message: "success prompt",
 		Data:    promptResponse,
 	})

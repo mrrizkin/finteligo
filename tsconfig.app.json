@@ -27,6 +27,7 @@
       "@lib/*": ["./resources/assets/scripts/lib/*"],
       "@schemas": ["./resources/assets/scripts/schemas/index"],
       "@schemas/*": ["./resources/assets/scripts/schemas/*"],
+      "@hooks/*": ["./resources/assets/scripts/hooks/*"],
       "@services/*": ["./resources/assets/scripts/services/*"],
       "@components/*": ["./resources/components/*"],
       "@pages/*": ["./resources/pages/*"]

@@ -1,13 +1,14 @@
 import { Slider } from "@/components/ui/slider";
+import * as queries from "@hooks/queries";
 import llamaTokenizer from "llama-tokenizer-js";
-import { Bird, CornerDownLeft, Rabbit, Settings, Turtle } from "lucide-react";
+import { CornerDownLeft, Settings } from "lucide-react";
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { toastValidation } from "@lib/utils";
 
-import { prompt } from "@services/playground";
+import * as playgroundService from "@services/playground";
 
 import { Badge } from "@components/ui/badge";
 import {
@@ -33,7 +34,15 @@ import { Textarea } from "@components/ui/textarea";
 
 import Header from "@components/partials/header";
 
+type ChatMessage = {
+  role: string;
+  content: string;
+};
+
 export default function PlaygroundPage() {
+  const [chatHistory, setChatHistory] = React.useState<ChatMessage[]>([]);
+  const { data: response } = queries.useModels();
+
   const [model, setModel] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
   const [temperature, setTemperature] = React.useState<number | null>(null);
@@ -73,14 +82,23 @@ export default function PlaygroundPage() {
   }
 
   function sendMessage() {
-    console.log("Sending message...", model, message, temperature, topP, topK, role, content);
     if (!model || !message) {
       toast.error("Please select a model and enter a message.");
       return;
     }
 
+    setChatHistory((prevChatHistory) => [
+      ...prevChatHistory,
+      {
+        role: "user",
+        content: message,
+      },
+    ]);
+
+    setMessage("");
+
     toastValidation(
-      prompt({
+      playgroundService.prompt({
         model,
         message,
         temperature,
@@ -88,10 +106,17 @@ export default function PlaygroundPage() {
         topK,
         role,
         content,
+        token: model,
       }),
       {
         success(data) {
-          console.log(data);
+          setChatHistory((prevChatHistory) => [
+            ...prevChatHistory,
+            {
+              role: "assistant",
+              content: data.data?.answer || "No answer provided.",
+            },
+          ]);
         },
       },
     );
@@ -135,45 +160,18 @@ export default function PlaygroundPage() {
                       <SelectValue placeholder="Select a model" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="genesis">
-                        <div className="flex items-start gap-3 text-muted-foreground">
-                          <Rabbit className="size-5" />
-                          <div className="grid gap-0.5">
-                            <p>
-                              Neural <span className="font-medium text-foreground">Genesis</span>
-                            </p>
-                            <p className="text-xs" data-description>
-                              Our fastest model for general use cases.
-                            </p>
+                      {response?.data?.data?.map((model) => (
+                        <SelectItem key={model.id} value={model.token}>
+                          <div className="flex items-start gap-3 text-muted-foreground">
+                            <div className="grid gap-0.5">
+                              <p>{model.model}</p>
+                              <p className="text-xs" data-description>
+                                {model.provider}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="explorer">
-                        <div className="flex items-start gap-3 text-muted-foreground">
-                          <Bird className="size-5" />
-                          <div className="grid gap-0.5">
-                            <p>
-                              Neural <span className="font-medium text-foreground">Explorer</span>
-                            </p>
-                            <p className="text-xs" data-description>
-                              Performance and speed for efficiency.
-                            </p>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="quantum">
-                        <div className="flex items-start gap-3 text-muted-foreground">
-                          <Turtle className="size-5" />
-                          <div className="grid gap-0.5">
-                            <p>
-                              Neural <span className="font-medium text-foreground">Quantum</span>
-                            </p>
-                            <p className="text-xs" data-description>
-                              The most powerful model for complex computations.
-                            </p>
-                          </div>
-                        </div>
-                      </SelectItem>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -238,45 +236,18 @@ export default function PlaygroundPage() {
                     <SelectValue placeholder="Select a model" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="genesis">
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <Rabbit className="size-5" />
-                        <div className="grid gap-0.5">
-                          <p>
-                            Neural <span className="font-medium text-foreground">Genesis</span>
-                          </p>
-                          <p className="text-xs" data-description>
-                            Our fastest model for general use cases.
-                          </p>
+                    {response?.data?.data?.map((model) => (
+                      <SelectItem key={model.id} value={model.token}>
+                        <div className="flex items-start gap-3 text-muted-foreground">
+                          <div className="grid gap-0.5">
+                            <p className="text-foreground">{model.model}</p>
+                            <p className="text-xs" data-description>
+                              {model.provider}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="explorer">
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <Bird className="size-5" />
-                        <div className="grid gap-0.5">
-                          <p>
-                            Neural <span className="font-medium text-foreground">Explorer</span>
-                          </p>
-                          <p className="text-xs" data-description>
-                            Performance and speed for efficiency.
-                          </p>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="quantum">
-                      <div className="flex items-start gap-3 text-muted-foreground">
-                        <Turtle className="size-5" />
-                        <div className="grid gap-0.5">
-                          <p>
-                            Neural <span className="font-medium text-foreground">Quantum</span>
-                          </p>
-                          <p className="text-xs" data-description>
-                            The most powerful model for complex computations.
-                          </p>
-                        </div>
-                      </div>
-                    </SelectItem>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -338,7 +309,23 @@ export default function PlaygroundPage() {
           <Badge variant="outline" className="absolute right-3 top-3">
             Output
           </Badge>
-          <div className="flex-1" />
+          <div className="flex-1 py-8">
+            <div className="flex flex-col gap-2">
+              {chatHistory.map((chat, index) =>
+                chat.role === "user" ? (
+                  <div key={index} className="flex items-start justify-end gap-2">
+                    <p className="max-w-[80%] text-sm">{chat.content}</p>
+                    <Badge variant="secondary">User</Badge>
+                  </div>
+                ) : (
+                  <div key={index} className="flex items-start justify-start gap-2">
+                    <Badge variant="default">Assistant</Badge>
+                    <p className="max-w-[80%] text-sm">{chat.content}</p>
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
           <form
             className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
             x-chunk="dashboard-03-chunk-1">
@@ -350,6 +337,7 @@ export default function PlaygroundPage() {
               placeholder="Type your message here..."
               className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
               onChange={onMessageChange}
+              value={message || ""}
             />
             <div className="flex items-center p-3 pt-0">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

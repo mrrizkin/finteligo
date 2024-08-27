@@ -86,3 +86,13 @@ func (h *Handlers) SendJson(c *fiber.Ctx, resp interface{}, status ...int) error
 
 	return c.Status(statusCode).JSON(resp)
 }
+
+func (h *Handlers) GetPaginationQuery(c *fiber.Ctx) types.Pagination {
+	page := c.QueryInt("page", 1)
+	perPage := c.QueryInt("per_page", 10)
+
+	return types.Pagination{
+		Page:    page,
+		PerPage: perPage,
+	}
+}
