@@ -1,13 +1,32 @@
-import { Link } from "react-router-dom";
+import { useQuery } from "react-query";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+
+import * as authService from "@services/auth";
+
+import { Error } from "@components/partials/utils";
+
+import Loading from "@components/loading";
 
 export default function IndexPage() {
-  return (
-    <div>
-      <h1>Welcome to Vite</h1>
-      <p>
-        Edit <code>resources/pages/index.tsx</code> and save to test HMR updates.
-      </p>
-      <Link to="/dashboard">Go to dashboard</Link>
-    </div>
-  );
+  const location = useLocation();
+  const { isLoading, isError, error } = useQuery("identity", () => authService.identity());
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    if (error instanceof Response && error.status === 401) {
+      toast.error("You need to login to access this page");
+      return <Navigate to="/auth/login" />;
+    }
+    return <Error response={error as Response} />;
+  }
+
+  if (location.pathname === "/") {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <Outlet />;
 }

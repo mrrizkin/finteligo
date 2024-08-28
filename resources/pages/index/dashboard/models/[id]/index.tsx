@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@comp
 import Header from "@components/partials/header";
 import { Error, Loading } from "@components/partials/utils";
 
-import { ShowModel } from "../show";
+import { ShowModel } from "../components/show";
 
 export default function EditModelPage() {
   const { id } = useParams();

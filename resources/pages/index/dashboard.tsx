@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 
+import { toastValidation } from "@lib/utils";
+
+import * as authService from "@services/auth";
+
 import { Button } from "@components/ui/button";
 import {
   DropdownMenu,
@@ -29,8 +33,11 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   function logout() {
-    localStorage.setItem("isLoggedIn", "false");
-    navigate("/login");
+    toastValidation(authService.logout(), {
+      success() {
+        navigate("/auth/login");
+      },
+    });
   }
 
   return (

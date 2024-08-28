@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	APP_NAME string `env:"APP_NAME,required"`
+	APP_KEY  string `env:"APP_KEY,required"`
 	ENV      string `env:"ENV,required"`
 	PORT     int    `env:"PORT,required"`
 	PREFORK  bool   `env:"PREFORK,default=false"`

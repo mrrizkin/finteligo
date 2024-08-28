@@ -20,7 +20,7 @@ import { Form } from "@components/ui/form";
 import Header from "@components/partials/header";
 import { Error, Loading } from "@components/partials/utils";
 
-import { FormModel, FormModelValues, formSchema } from "../form";
+import { FormModel, FormModelValues, formSchema } from "../components/form";
 
 export default function EditModelPage() {
   const { id } = useParams();

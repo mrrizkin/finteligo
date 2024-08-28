@@ -46,7 +46,9 @@ func New(config *config.Config) (*Session, error) {
 
 	return &Session{
 		Store: session.New(session.Config{
-			Storage: storage,
+			Storage:    storage,
+			Expiration: 24 * time.Hour,
+			KeyLookup:  "cookie:finteligo_session_key",
 		}),
 		storage: storage,
 	}, nil

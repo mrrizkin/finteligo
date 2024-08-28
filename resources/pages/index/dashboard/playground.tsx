@@ -1,3 +1,4 @@
+import * as queries from "@hooks/queries";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import llamaTokenizer from "llama-tokenizer-js";
 import { CheckIcon, CornerDownLeft, Settings } from "lucide-react";
@@ -10,8 +11,6 @@ import { cn } from "@lib/utils";
 import { Models } from "@schemas/models";
 
 import * as playgroundService from "@services/playground";
-
-import * as queries from "@hooks/queries";
 
 import { Badge } from "@components/ui/badge";
 import {
@@ -54,6 +53,7 @@ export default function PlaygroundPage() {
   const [assistantMessage, setAssistantMessage] = React.useState<string | null>(null);
   const [temperature, setTemperature] = React.useState<number | null>(null);
   const [topP, setTopP] = React.useState<number | null>(null);
+  const [promptStatus, setPromptStatus] = React.useState<string | null>(null);
   const [topK, setTopK] = React.useState<number | null>(null);
   const [role, setRole] = React.useState<string | null>(null);
   const [content, setContent] = React.useState<string | null>(null);
@@ -105,6 +105,7 @@ export default function PlaygroundPage() {
     ]);
 
     setMessage("");
+    setPromptStatus("pending");
 
     playgroundService.prompt({
       payload: {
@@ -118,9 +119,11 @@ export default function PlaygroundPage() {
         token: model.token,
       },
       stream(value) {
+        setPromptStatus("streaming");
         setAssistantMessage((prevAssistantMessage) => (prevAssistantMessage || "") + value);
       },
       done() {
+        setPromptStatus("done");
         setAssistantMessage((finalAssistantMessage) => {
           setChatHistory((prevChatHistory) => [
             ...prevChatHistory,
@@ -133,6 +136,7 @@ export default function PlaygroundPage() {
         });
       },
       error(error) {
+        setPromptStatus("error");
         toast.error(error);
       },
     });
@@ -412,6 +416,7 @@ export default function PlaygroundPage() {
               Message
             </Label>
             <Textarea
+              disabled={promptStatus === "pending" || promptStatus === "streaming"}
               id="message"
               placeholder="Type your message here..."
               className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
@@ -442,7 +447,12 @@ export default function PlaygroundPage() {
                 <TooltipContent side="top">Use Microphone</TooltipContent>
               </Tooltip>
               */}
-              <Button type="submit" size="sm" className="ml-auto gap-1.5" onClick={sendMessage}>
+              <Button
+                type="submit"
+                size="sm"
+                className="ml-auto gap-1.5"
+                onClick={sendMessage}
+                disabled={!model || !message || promptStatus === "pending" || promptStatus === "streaming"}>
                 Send Message
                 <CornerDownLeft className="size-3.5" />
               </Button>

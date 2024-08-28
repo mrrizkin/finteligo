@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/mrrizkin/finteligo/app/domains/auth"
 	"github.com/mrrizkin/finteligo/app/domains/models"
 	"github.com/mrrizkin/finteligo/app/domains/permission"
 	"github.com/mrrizkin/finteligo/app/domains/playground"
@@ -14,6 +15,9 @@ import (
 
 type Handlers struct {
 	*types.App
+
+	authRepo    *auth.Repo
+	authService *auth.Service
 
 	modelsRepo    *models.Repo
 	modelsService *models.Service
@@ -36,6 +40,9 @@ type Handlers struct {
 func New(
 	app *types.App,
 ) *Handlers {
+	authRepo := auth.NewRepo(app.System.Database)
+	authService := auth.NewService(authRepo)
+
 	modelsRepo := models.NewRepo(app.System.Database)
 	modelsService := models.NewService(modelsRepo, app.Library.LangChain)
 
@@ -55,6 +62,9 @@ func New(
 
 	return &Handlers{
 		App: app,
+
+		authRepo:    authRepo,
+		authService: authService,
 
 		modelsRepo:    modelsRepo,
 		modelsService: modelsService,

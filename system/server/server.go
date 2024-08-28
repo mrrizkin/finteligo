@@ -63,29 +63,25 @@ func New(config *config.Config, logger *logger.Logger, session *session.Session)
 		},
 	})
 
-	if config.ENV != "development" {
-		csrfConfig := csrf.Config{
-			KeyLookup:         "header:" + csrf.HeaderName,
-			CookieName:        "finteligo_csrf_token",
-			CookieSameSite:    "Lax",
-			CookieSecure:      false,
-			CookieSessionOnly: true,
-			CookieHTTPOnly:    true,
-			SingleUseToken:    true,
-			Expiration:        1 * time.Hour,
-			KeyGenerator:      utils.UUIDv4,
-			ErrorHandler:      csrf.ConfigDefault.ErrorHandler,
-			Extractor:         csrf.CsrfFromHeader(csrf.HeaderName),
-			Session:           session.Store,
-			SessionKey:        "fiber.csrf.token",
-			HandlerContextKey: "fiber.csrf.handler",
-		}
-
-		app.Use(csrf.New(csrfConfig))
+	csrfConfig := csrf.Config{
+		KeyLookup:         "cookie:" + csrf.HeaderName,
+		CookieName:        "finteligo_csrf_token",
+		CookieSameSite:    "Lax",
+		CookieSecure:      false,
+		CookieSessionOnly: true,
+		CookieHTTPOnly:    true,
+		SingleUseToken:    true,
+		Expiration:        1 * time.Hour,
+		KeyGenerator:      utils.UUIDv4,
+		ErrorHandler:      csrf.ConfigDefault.ErrorHandler,
+		Extractor:         csrf.CsrfFromCookie("finteligo_csrf_token"),
+		Session:           session.Store,
+		SessionKey:        "fiber.csrf.token",
+		HandlerContextKey: "fiber.csrf.handler",
 	}
 
+	app.Use(csrf.New(csrfConfig))
 	app.Static("/", "public")
-
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: logger.Logger,
 	}))
