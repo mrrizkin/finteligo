@@ -4,6 +4,7 @@ import (
 	"github.com/mrrizkin/finteligo/app/models"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
+	lcTypes "github.com/mrrizkin/finteligo/third_party/langchain/types"
 )
 
 func NewService(repo *Repo, lc *langchain.LangChain) *Service {
@@ -14,7 +15,7 @@ func NewService(repo *Repo, lc *langchain.LangChain) *Service {
 }
 
 func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLLM, error) {
-	err := s.langchain.AddLLM(langchain.AddLLMParams{
+	err := s.langchain.AddLLM(lcTypes.AddLLMParams{
 		UserID:   langChainLLM.UserID,
 		Token:    langChainLLM.Token,
 		Model:    langChainLLM.Model,

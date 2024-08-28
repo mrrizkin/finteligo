@@ -8,7 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizkin/finteligo/app/domains/playground"
-	"github.com/mrrizkin/finteligo/third_party/langchain"
+	"github.com/mrrizkin/finteligo/third_party/langchain/types"
 	"github.com/valyala/fasthttp"
 )
 
@@ -52,7 +52,7 @@ func (h *Handlers) Prompt(c *fiber.Ctx) error {
 			}
 		}
 
-		promptPayload := langchain.PromptPayload{
+		promptPayload := types.PromptPayload{
 			Role:        payload.Role,
 			Content:     payload.Content,
 			Model:       payload.Model,

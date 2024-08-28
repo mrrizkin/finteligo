@@ -3,10 +3,9 @@ package langchain
 import (
 	"github.com/mrrizkin/finteligo/app/models"
 	"github.com/mrrizkin/finteligo/system/database"
+	"github.com/mrrizkin/finteligo/third_party/langchain/types"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
-
-type LangChainToken = string
 
 type LangChain struct {
 	logger *logger.Logger
@@ -16,22 +15,22 @@ type LangChain struct {
 
 func New(logger *logger.Logger, db *database.Database) *LangChain {
 	return &LangChain{
-		store:  NewStore(logger),
+		store:  NewStore(),
 		logger: logger,
 		db:     db,
 	}
 }
 
-func (lc *LangChain) Prompt(token LangChainToken, prompt PromptPayload) error {
+func (lc *LangChain) Prompt(token types.Token, payload types.PromptPayload) error {
 	llm, err := lc.store.GetLLM(token)
 	if err != nil {
 		return err
 	}
 
-	return llm.Prompt(prompt)
+	return llm.Prompt(payload)
 }
 
-func (lc *LangChain) AddLLM(params AddLLMParams) error {
+func (lc *LangChain) AddLLM(params types.AddLLMParams) error {
 	storedLLM := models.LangChainLLM{
 		UserID:   params.UserID,
 		Token:    params.Token,
@@ -72,7 +71,7 @@ func (lc *LangChain) AddLLM(params AddLLMParams) error {
 	return nil
 }
 
-func (lc *LangChain) RemoveLLM(token LangChainToken) error {
+func (lc *LangChain) RemoveLLM(token types.Token) error {
 	storedLLM := new(models.LangChainLLM)
 	err := lc.db.Find(storedLLM).
 		Where("token = ?", token).
@@ -106,7 +105,7 @@ func (lc *LangChain) InitializeLLMs() error {
 
 	for _, storedLLM := range storedLLMs {
 		lc.logger.Info().Msgf("initializing LLM: %s", storedLLM.Token)
-		err = lc.store.AddLLM(AddLLMParams{
+		err = lc.store.AddLLM(types.AddLLMParams{
 			Token:    storedLLM.Token,
 			Model:    storedLLM.Model,
 			Provider: storedLLM.Provider,
