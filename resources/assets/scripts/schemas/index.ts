@@ -24,6 +24,11 @@ export type Schema = {
   safeParseAsync: SafeParseAsync;
 };
 
+export type PaginationFilter = {
+  page?: number | null;
+  per_page?: number | null;
+};
+
 export type ErrorResponseSchema = z.infer<typeof errorResponseSchema>;
 
 export type StatusResponseSchema = z.infer<typeof statusResponseSchema>;

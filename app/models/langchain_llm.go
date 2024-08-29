@@ -12,7 +12,7 @@ type LangChainLLM struct {
 	UpdatedAt *time.Time     `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID    uint           `json:"user_id"`
-	Token     string         `json:"token"      gorm:"unique;not null;index"           validate:"required"`
+	Token     string         `json:"token"      gorm:"unique;not null;index"`
 	Model     string         `json:"model"                                             validate:"required"`
 	Provider  string         `json:"provider"                                          validate:"required"`
 	URL       string         `json:"url"`

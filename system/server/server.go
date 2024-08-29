@@ -4,23 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/idempotency"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"github.com/gofiber/fiber/v2/utils"
 	"github.com/gofiber/template/html/v2"
 
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/mrrizkin/finteligo/app/config"
 	"github.com/mrrizkin/finteligo/resources"
-	"github.com/mrrizkin/finteligo/system/session"
 	"github.com/mrrizkin/finteligo/system/validator"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
@@ -41,7 +37,7 @@ type MenuItem struct {
 	Icon string
 }
 
-func New(config *config.Config, logger *logger.Logger, session *session.Session) *Server {
+func New(config *config.Config, logger *logger.Logger) *Server {
 	app := fiber.New(fiber.Config{
 		Prefork:               config.PREFORK,
 		AppName:               config.APP_NAME,
@@ -63,24 +59,6 @@ func New(config *config.Config, logger *logger.Logger, session *session.Session)
 		},
 	})
 
-	csrfConfig := csrf.Config{
-		KeyLookup:         "cookie:" + csrf.HeaderName,
-		CookieName:        "finteligo_csrf_token",
-		CookieSameSite:    "Lax",
-		CookieSecure:      false,
-		CookieSessionOnly: true,
-		CookieHTTPOnly:    true,
-		SingleUseToken:    true,
-		Expiration:        1 * time.Hour,
-		KeyGenerator:      utils.UUIDv4,
-		ErrorHandler:      csrf.ConfigDefault.ErrorHandler,
-		Extractor:         csrf.CsrfFromCookie("finteligo_csrf_token"),
-		Session:           session.Store,
-		SessionKey:        "fiber.csrf.token",
-		HandlerContextKey: "fiber.csrf.handler",
-	}
-
-	app.Use(csrf.New(csrfConfig))
 	app.Static("/", "public")
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: logger.Logger,

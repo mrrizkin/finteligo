@@ -51,40 +51,6 @@ export function useTable(props: UseTableProps) {
 
 export const columns: ColumnDef<ApiToken>[] = [
   {
-    id: "action",
-    header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="" />;
-    },
-    enableHiding: false,
-    cell: () => {
-      return (
-        <div className="space-x-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm">
-                <Ellipsis className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>
-                <Clipboard className="mr-2 size-4" />
-                Copy To Clipboard
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Ban className="mr-2 size-4" />
-                Disable API Token
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Trash className="mr-2 size-4" />
-                Delete API Token
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
-    },
-  },
-  {
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Key" />;
     },
@@ -101,6 +67,34 @@ export const columns: ColumnDef<ApiToken>[] = [
   },
   {
     header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Created By" />;
+    },
+    accessorKey: "user.name",
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-col">
+          <span>{row.original.user?.name}</span>
+          <code className="text-xs text-muted-foreground">{row.original.user?.email}</code>
+        </div>
+      );
+    },
+  },
+  {
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Created At" />;
+    },
+    accessorKey: "created_at",
+    cell: ({ row }) => {
+      const date = new Date(row.original.created_at).toLocaleString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+      return <span className="text-muted-foreground">{date}</span>;
+    },
+  },
+  {
+    header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Group" />;
     },
     accessorKey: "group",
@@ -112,6 +106,40 @@ export const columns: ColumnDef<ApiToken>[] = [
     accessorKey: "enabled",
     cell: ({ row }) => {
       return <Switch checked={row.original.enabled} />;
+    },
+  },
+  {
+    id: "action",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="" />;
+    },
+    enableHiding: false,
+    cell: () => {
+      return (
+        <div className="space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm">
+                <Ellipsis className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Clipboard className="mr-2 size-4" />
+                Copy To Clipboard
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Ban className="mr-2 size-4" />
+                Disable API Token
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Trash className="mr-2 size-4" />
+                Delete API Token
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
     },
   },
 ];

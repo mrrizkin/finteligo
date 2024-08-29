@@ -1,6 +1,7 @@
 package models
 
 import (
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/mrrizkin/finteligo/app/models"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
@@ -15,9 +16,14 @@ func NewService(repo *Repo, lc *langchain.LangChain) *Service {
 }
 
 func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLLM, error) {
-	err := s.langchain.AddLLM(lcTypes.AddLLMParams{
+	token, err := generateToken()
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.langchain.AddLLM(lcTypes.AddLLMParams{
 		UserID:   langChainLLM.UserID,
-		Token:    langChainLLM.Token,
+		Token:    token,
 		Model:    langChainLLM.Model,
 		Provider: langChainLLM.Provider,
 		URL:      langChainLLM.URL,
@@ -27,7 +33,7 @@ func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLL
 		return nil, err
 	}
 
-	lcLLM, err := s.repo.FindByToken(langChainLLM.Token)
+	lcLLM, err := s.repo.FindByToken(token)
 	if err != nil {
 		return nil, err
 	}
@@ -85,4 +91,12 @@ func (s *Service) Delete(id uint) error {
 	}
 
 	return s.langchain.RemoveLLM(lcLLM.Token)
+}
+
+func generateToken() (string, error) {
+	token, err := gonanoid.Generate(
+		"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-",
+		32,
+	)
+	return "fin_ml_" + token, err
 }

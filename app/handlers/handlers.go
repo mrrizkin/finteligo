@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"github.com/gofiber/fiber/v2"
-
 	"github.com/mrrizkin/finteligo/app/domains/api_token"
 	"github.com/mrrizkin/finteligo/app/domains/auth"
 	"github.com/mrrizkin/finteligo/app/domains/models"
@@ -11,7 +9,6 @@ import (
 	"github.com/mrrizkin/finteligo/app/domains/role"
 	"github.com/mrrizkin/finteligo/app/domains/role_permission"
 	"github.com/mrrizkin/finteligo/app/domains/user"
-	dbModels "github.com/mrrizkin/finteligo/app/models"
 	"github.com/mrrizkin/finteligo/system/types"
 )
 
@@ -93,37 +90,5 @@ func New(
 
 		userRepo:    userRepo,
 		userService: userService,
-	}
-}
-
-func (h *Handlers) GetUser(c *fiber.Ctx) *dbModels.User {
-	userId := c.Locals("uid").(uint)
-	user, err := h.userRepo.FindByID(userId)
-	if err != nil {
-		return nil
-	}
-
-	return user
-}
-
-func (h *Handlers) SendJson(c *fiber.Ctx, resp types.Response, status ...int) error {
-	var statusCode int
-
-	if len(status) == 0 {
-		statusCode = 200
-	} else {
-		statusCode = status[0]
-	}
-
-	return c.Status(statusCode).JSON(resp)
-}
-
-func (h *Handlers) GetPaginationQuery(c *fiber.Ctx) types.Pagination {
-	page := c.QueryInt("page", 1)
-	perPage := c.QueryInt("per_page", 10)
-
-	return types.Pagination{
-		Page:    page,
-		PerPage: perPage,
 	}
 }

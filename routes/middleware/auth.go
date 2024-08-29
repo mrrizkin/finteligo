@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/mrrizkin/finteligo/app/handlers"
 	"github.com/mrrizkin/finteligo/system/types"
 )
 
@@ -9,12 +10,12 @@ func mockGetUserByToken(token string) (uint, string, error) {
 	return 1, "session-id", nil
 }
 
-func AuthProtected(app *types.App) fiber.Handler {
+func AuthProtected(app *types.App, handler *handlers.Handlers) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		apiToken := c.Get("finteligo-api-token")
 
 		if apiToken != "" {
-			uid, sid, err := mockGetUserByToken(apiToken)
+			user, err := handler.GetUserByToken(apiToken)
 			if err != nil {
 				return &fiber.Error{
 					Code:    fiber.StatusForbidden,
@@ -22,9 +23,7 @@ func AuthProtected(app *types.App) fiber.Handler {
 				}
 			}
 
-			c.Locals("uid", uid)
-			c.Locals("sid", sid)
-
+			c.Locals("uid", user.ID)
 			return c.Next()
 		}
 

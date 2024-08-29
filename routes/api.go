@@ -7,11 +7,11 @@ import (
 )
 
 func ApiRoutes(api fiber.Router, handler *handlers.Handlers) {
-	api.Get("/identity", middleware.AuthProtected(handler.App), handler.Identity)
+	api.Get("/identity", middleware.AuthProtected(handler.App, handler), handler.Identity)
 	api.Post("/login", handler.Login)
 	api.Post("/logout", handler.Logout)
 
-	v1 := api.Group("/v1", middleware.AuthProtected(handler.App))
+	v1 := api.Group("/v1", middleware.AuthProtected(handler.App, handler))
 
 	v1.Get("/api-tokens", handler.ApiTokenFindAll)
 	v1.Get("/api-tokens/:id", handler.ApiTokenFindByID)

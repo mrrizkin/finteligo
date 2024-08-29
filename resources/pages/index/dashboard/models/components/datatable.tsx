@@ -7,13 +7,15 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Eye, Pencil } from "lucide-react";
+import { Ellipsis, Eye, Pencil } from "lucide-react";
 import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { Models } from "@schemas/models";
 
+import { Badge } from "@components/ui/badge";
 import { Button } from "@components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { Switch } from "@components/ui/switch";
 
 import { DataTableColumnHeader } from "@components/partials/data-table-column-header";
@@ -51,34 +53,19 @@ export function useTable(props: UseTableProps) {
 
 export const columns: ColumnDef<Models>[] = [
   {
-    id: "action",
-    header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Action" />;
-    },
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <div className="space-x-2">
-          <Button variant="secondary" size="sm" asChild>
-            <Link to={`/dashboard/models/${row.original.id}`}>
-              <Eye className="size-4" />
-            </Link>
-          </Button>
-          <Button variant="secondary" size="sm" asChild>
-            <Link to={`/dashboard/models/${row.original.id}/edit`}>
-              <Pencil className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      );
-    },
-  },
-  {
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Model" />;
     },
     enableHiding: false,
     accessorKey: "model",
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-col">
+          <span>{row.original.model}</span>
+          <code className="text-xs text-muted-foreground">{row.original.token}</code>
+        </div>
+      );
+    },
   },
   {
     header: ({ column }) => {
@@ -91,6 +78,22 @@ export const columns: ColumnDef<Models>[] = [
       return <DataTableColumnHeader column={column} title="Status" />;
     },
     accessorKey: "status",
+    cell: ({ row }) => {
+      let variant: "default" | "secondary" | "destructive" | "outline" = "default";
+      switch (row.original.status) {
+        case "ok":
+          variant = "default";
+          break;
+        case "error":
+          variant = "destructive";
+          break;
+        case "pending":
+          variant = "secondary";
+          break;
+      }
+
+      return <Badge variant={variant}>{row.original.status}</Badge>;
+    },
   },
   {
     header: ({ column }) => {
@@ -99,6 +102,40 @@ export const columns: ColumnDef<Models>[] = [
     accessorKey: "enabled",
     cell: ({ row }) => {
       return <Switch checked={row.original.enabled} />;
+    },
+  },
+  {
+    id: "action",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="" />;
+    },
+    enableHiding: false,
+    cell: ({ row }) => {
+      return (
+        <div className="space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm">
+                <Ellipsis className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to={`/dashboard/models/${row.original.id}`}>
+                  <Eye className="mr-2 size-4" />
+                  Show
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to={`/dashboard/models/${row.original.id}/edit`}>
+                  <Pencil className="mr-2 size-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
     },
   },
 ];

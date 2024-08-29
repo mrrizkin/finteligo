@@ -15,6 +15,7 @@ export const playgroundPromptPayloadSchema = z.object({
   role: z.string().nullable().optional(),
   content: z.string().nullable().optional(),
   token: z.string().nullable().optional(),
+  stream: z.boolean().nullable().optional(),
 });
 
 export const playgroundPromptResponseSchema = createResponseSchema(
@@ -27,7 +28,14 @@ export type PlaygroundPromptPayload = z.infer<typeof playgroundPromptPayloadSche
 export type PlaygroundPromptResponse = z.infer<typeof playgroundPromptResponseSchema>;
 export type PromptRequestOptions = {
   payload?: PlaygroundPromptPayload;
-  stream?: (data: string) => void;
+  stream?: (data: SSEResponse) => void;
   done?: () => void;
   error?: (error: string) => void;
+};
+
+export type SSEResponse = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+  id: string;
+  event: string;
 };

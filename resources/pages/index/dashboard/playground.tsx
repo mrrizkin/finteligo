@@ -41,7 +41,7 @@ import Header from "@components/partials/header";
 
 type ChatMessage = {
   role: string;
-  content: string;
+  content: string[];
 };
 
 export default function PlaygroundPage() {
@@ -50,7 +50,7 @@ export default function PlaygroundPage() {
 
   const [model, setModel] = React.useState<Models | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
-  const [assistantMessage, setAssistantMessage] = React.useState<string | null>(null);
+  const [assistantMessage, setAssistantMessage] = React.useState<string[]>([]);
   const [temperature, setTemperature] = React.useState<number | null>(null);
   const [topP, setTopP] = React.useState<number | null>(null);
   const [promptStatus, setPromptStatus] = React.useState<string | null>(null);
@@ -91,7 +91,7 @@ export default function PlaygroundPage() {
   }
 
   function sendMessage() {
-    if (!model || !message) {
+    if (!model || !message?.trim()) {
       toast.error("Please select a model and enter a message.");
       return;
     }
@@ -100,7 +100,7 @@ export default function PlaygroundPage() {
       ...prevChatHistory,
       {
         role: "user",
-        content: message,
+        content: [message],
       },
     ]);
 
@@ -109,7 +109,7 @@ export default function PlaygroundPage() {
 
     playgroundService.prompt({
       payload: {
-        model: model.model,
+        model: model.model || "",
         message,
         temperature,
         topP,
@@ -117,10 +117,32 @@ export default function PlaygroundPage() {
         role,
         content,
         token: model.token,
+        stream: true,
       },
       stream(value) {
         setPromptStatus("streaming");
-        setAssistantMessage((prevAssistantMessage) => (prevAssistantMessage || "") + value);
+        const message = value.data.slice(1, -1);
+
+        if (message.includes("\\n")) {
+          const messages = message.split("\\n");
+          setAssistantMessage((prev) => {
+            if (prev.length === 0) {
+              return messages;
+            }
+
+            return [...prev.slice(0, -1), prev[prev.length - 1] + messages[0], ...messages.slice(1)];
+          });
+
+          return;
+        }
+
+        setAssistantMessage((prev) => {
+          if (prev.length === 0) {
+            return [message];
+          }
+
+          return [...prev.slice(0, -1), prev[prev.length - 1] + message];
+        });
       },
       done() {
         setPromptStatus("done");
@@ -132,7 +154,7 @@ export default function PlaygroundPage() {
               content: finalAssistantMessage || "No answer provided.",
             },
           ]);
-          return "";
+          return [];
         });
       },
       error(error) {
@@ -140,6 +162,13 @@ export default function PlaygroundPage() {
         toast.error(error);
       },
     });
+  }
+
+  function handleCtrlEnterKey(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && event.ctrlKey) {
+      event.preventDefault();
+      sendMessage();
+    }
   }
 
   return (
@@ -391,32 +420,54 @@ export default function PlaygroundPage() {
               {chatHistory.map((chat, index) =>
                 chat.role === "user" ? (
                   <div key={index} className="flex items-start justify-end gap-2">
-                    <p className="max-w-[80%] text-sm">{chat.content}</p>
+                    <div className="max-w-[80%] space-y-4">
+                      {chat.content.map((content, i) => (
+                        <p key={i} className="text-sm">
+                          {content}
+                        </p>
+                      ))}
+                    </div>
                     <Badge variant="secondary">User</Badge>
                   </div>
                 ) : (
                   <div key={index} className="flex items-start justify-start gap-2">
                     <Badge variant="default">Assistant</Badge>
-                    <p className="max-w-[80%] text-sm">{chat.content}</p>
+                    <div className="max-w-[80%] space-y-4">
+                      {chat.content.map((content, i) => (
+                        <p key={i} className="text-sm">
+                          {content}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 ),
               )}
-              {assistantMessage && (
+              {assistantMessage.length > 0 && (
                 <div className="flex items-start justify-start gap-2">
                   <Badge variant="default">Assistant</Badge>
-                  <p className="max-w-[80%] text-sm">{assistantMessage}</p>
+                  <div className="max-w-[80%] space-y-4">
+                    {assistantMessage.map((content, i) => (
+                      <p key={i} className="text-sm">
+                        {content}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
           <form
-            className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+            className={cn(
+              "relative overflow-hidden rounded-lg border focus-within:ring-1 focus-within:ring-ring",
+              promptStatus === "streaming" || promptStatus === "pending" ? "bg-muted" : "bg-background",
+            )}
             x-chunk="dashboard-03-chunk-1">
             <Label htmlFor="message" className="sr-only">
               Message
             </Label>
             <Textarea
               disabled={promptStatus === "pending" || promptStatus === "streaming"}
+              onKeyUp={handleCtrlEnterKey}
               id="message"
               placeholder="Type your message here..."
               className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"

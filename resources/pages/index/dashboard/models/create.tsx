@@ -35,8 +35,6 @@ export default function CreateModelPage() {
   });
 
   function onSubmit(values: FormModelValues) {
-    const token = values.token || new Date().getTime().toString();
-    values.token = token;
     modelsService.create(values).then(() => {
       form.reset();
       navigate("/dashboard/models");

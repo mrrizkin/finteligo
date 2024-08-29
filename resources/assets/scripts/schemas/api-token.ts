@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { createResponseSchema, createResponsesSchema, generalModelSchema } from "@schemas";
 
+import { userSchema } from "./user";
+
 /** ================================ MODEL ================================= **/
 
 export const apiTokenSchema = z
@@ -13,6 +15,7 @@ export const apiTokenSchema = z
     expiry_date: z.string().optional(),
     expired: z.boolean().optional(),
     enabled: z.boolean().optional(),
+    user: userSchema.optional().nullable(),
   })
   .merge(generalModelSchema);
 

@@ -40,7 +40,7 @@ func Run() {
 	}
 
 	valid := validator.New()
-	serv := server.New(conf, log, sess)
+	serv := server.New(conf, log)
 
 	lc := langchain.New(log, db)
 	lc.InitializeLLMs()
@@ -57,7 +57,7 @@ func Run() {
 		Library: &types.Library{
 			LangChain: lc,
 		},
-	})
+	}, sess)
 
 	log.Info().Msgf("Server is running on port %d", conf.PORT)
 
