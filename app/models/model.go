@@ -22,6 +22,7 @@ func New() *Model {
 			&Subscription{},
 			&User{},
 			&LangChainLLM{},
+			&ApiToken{},
 		},
 		seeds: []Seed{
 			&Permission{},

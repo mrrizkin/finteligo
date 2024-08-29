@@ -26,12 +26,6 @@ func (r *Repo) FindAll(
 		return nil, err
 	}
 
-	var count int64 = 0
-	err = r.db.Model(&models.LangChainLLM{}).Count(&count).Error
-	if err != nil {
-		return nil, err
-	}
-
 	return langChainLLMs, err
 }
 

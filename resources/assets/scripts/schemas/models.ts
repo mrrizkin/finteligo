@@ -6,14 +6,14 @@ import { createResponseSchema, createResponsesSchema, generalModelSchema } from 
 
 export const modelsSchema = z
   .object({
-    user_id: z.number(),
-    token: z.string(),
-    model: z.string(),
-    provider: z.string(),
-    url: z.string(),
-    api_key: z.string(),
-    status: z.string(),
-    enabled: z.boolean(),
+    user_id: z.number().optional(),
+    token: z.string().optional(),
+    model: z.string().optional(),
+    provider: z.string().optional(),
+    url: z.string().optional(),
+    api_key: z.string().optional(),
+    status: z.string().optional(),
+    enabled: z.boolean().optional(),
     error: z.string().nullable(),
   })
   .merge(generalModelSchema);

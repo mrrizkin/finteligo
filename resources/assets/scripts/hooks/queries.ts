@@ -1,6 +1,21 @@
 import { useQuery } from "react-query";
 
+import * as apiTokensService from "@services/api-token";
 import * as modelsService from "@services/models";
+
+export function useApiTokens() {
+  return useQuery({
+    queryKey: ["list-api-tokens"],
+    queryFn: () => apiTokensService.get_all(),
+  });
+}
+
+export function useApiToken(id: number) {
+  return useQuery({
+    queryKey: ["find-api-token", id],
+    queryFn: () => apiTokensService.find(id),
+  });
+}
 
 export function useModels() {
   return useQuery({

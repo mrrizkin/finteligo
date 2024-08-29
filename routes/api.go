@@ -13,6 +13,12 @@ func ApiRoutes(api fiber.Router, handler *handlers.Handlers) {
 
 	v1 := api.Group("/v1", middleware.AuthProtected(handler.App))
 
+	v1.Get("/api-tokens", handler.ApiTokenFindAll)
+	v1.Get("/api-tokens/:id", handler.ApiTokenFindByID)
+	v1.Post("/api-tokens", handler.ApiTokenCreate)
+	v1.Put("/api-tokens/:id", handler.ApiTokenUpdate)
+	v1.Delete("/api-tokens/:id", handler.ApiTokenDelete)
+
 	v1.Get("/models", handler.ModelsFindAll)
 	v1.Get("/models/:id", handler.ModelsFindByID)
 	v1.Post("/models", handler.ModelsCreate)
