@@ -8,16 +8,18 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/mrrizkin/finteligo/app/domains/playground"
+	"github.com/mrrizkin/finteligo/app/domains/think"
+	ttypes "github.com/mrrizkin/finteligo/app/domains/think/types"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 	"github.com/valyala/fasthttp"
 )
 
-func playgroundPrompting(
+func askAIPrompting(
 	w *bufio.Writer,
-	payload *playground.PromptPayload,
-	service *playground.Service,
+	useCase string,
+	payload *ttypes.PromptPayload,
+	service *think.Service,
 	log *logger.Logger,
 	sendStream func(w *bufio.Writer, response *StreamResponse) error,
 ) *types.Response {
@@ -32,7 +34,7 @@ func playgroundPrompting(
 
 	if !payload.Stream {
 		go func() {
-			err := service.Prompt(payload)
+			err := service.AskAI(useCase, payload)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to prompt")
 				payload.Channel <- "error: " + err.Error()
@@ -68,7 +70,7 @@ func playgroundPrompting(
 		}
 		payload.StreamFunc = &streamFunc
 		go func() {
-			err := service.Prompt(payload)
+			err := service.AskAI(useCase, payload)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to prompt")
 				payload.Channel <- "error: " + err.Error()
@@ -115,11 +117,22 @@ func playgroundPrompting(
 					if w != nil {
 						return nil
 					} else {
+						parsed, err := service.OutputParser(promptResponse)
+						if err != nil {
+							log.Error().Err(err).Msg("failed to parse output")
+							return &types.Response{
+								Title:   "Prompt",
+								Message: "Prompt error",
+								Status:  "error",
+								Data:    "failed to parse output",
+							}
+						}
+
 						return &types.Response{
 							Title:   "Prompt",
 							Message: "Prompt success",
 							Status:  "success",
-							Data:    promptResponse,
+							Data:    parsed,
 						}
 					}
 				}
@@ -128,32 +141,72 @@ func playgroundPrompting(
 	}
 }
 
-func (h *Handlers) Prompt(c *fiber.Ctx) error {
-	payload := new(playground.PromptPayload)
+func (h *Handlers) AskAI(c *fiber.Ctx) error {
+	useCase := c.Query("case")
+	if useCase == "" {
+		return &fiber.Error{
+			Code:    400,
+			Message: "command not valid",
+		}
+	}
+
+	var messsage string
+
+	switch useCase {
+	case "ppatp":
+		payload := new(ttypes.PPATPPayload)
+		err := c.BodyParser(payload)
+		if err != nil {
+			h.System.Logger.Error().Err(err).Msg("failed to parse payload")
+			return &fiber.Error{
+				Code:    400,
+				Message: "payload not valid",
+			}
+		}
+		validationError := h.System.Validator.MustValidate(payload)
+		if validationError != nil {
+			return validationError
+		}
+
+		messsage = h.thinkService.GenerateMessage(useCase, payload)
+
+	default:
+		return &fiber.Error{
+			Code:    400,
+			Message: "use case not valid",
+		}
+	}
+
+	payload := new(ttypes.PromptPayload)
 	err := c.BodyParser(payload)
 	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
 		return &fiber.Error{
 			Code:    400,
 			Message: "payload not valid",
 		}
 	}
-
 	validationError := h.System.Validator.MustValidate(payload)
 	if validationError != nil {
 		return validationError
 	}
 
+	payload.Message = messsage
+
 	if !payload.Stream {
-		response := playgroundPrompting(
+		response := askAIPrompting(
 			nil,
+			useCase,
 			payload,
-			h.playgroundService,
+			h.thinkService,
 			h.System.Logger,
 			h.SendStream,
 		)
 		if response != nil {
 			return h.SendJson(c, *response)
 		}
+
+		return nil
 	}
 
 	c.Set("Content-Type", "text/event-stream")
@@ -163,16 +216,19 @@ func (h *Handlers) Prompt(c *fiber.Ctx) error {
 	c.Status(fiber.StatusOK).
 		Context().
 		SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
-			response := playgroundPrompting(
+			response := askAIPrompting(
 				w,
+				useCase,
 				payload,
-				h.playgroundService,
+				h.thinkService,
 				h.System.Logger,
 				h.SendStream,
 			)
 			if response != nil {
 				h.SendJson(c, *response)
 			}
+
+			return
 		}))
 
 	return nil

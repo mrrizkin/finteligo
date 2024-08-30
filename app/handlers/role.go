@@ -28,7 +28,7 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 		h.System.Logger.Error().Err(err).Msg("failed create role")
 		return &fiber.Error{
 			Code:    500,
-			Message: "failed create role",
+			Message: "failed create roles",
 		}
 	}
 

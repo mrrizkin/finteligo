@@ -39,6 +39,8 @@ func ApiRoutes(api fiber.Router, handler *handlers.Handlers) {
 	v1.Put("/role_permission/:id", handler.RolePermissionUpdate)
 	v1.Delete("/role_permission/:id", handler.RolePermissionDelete)
 
+	v1.Post("/ask-ai", handler.AskAI)
+
 	v1.Get("/role", handler.RoleFindAll)
 	v1.Get("/role/:id", handler.RoleFindByID)
 	v1.Post("/role", handler.RoleCreate)

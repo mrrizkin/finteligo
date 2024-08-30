@@ -2,11 +2,14 @@ package types
 
 import (
 	"context"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 type LLM interface {
 	Prompt(payload PromptPayload) error
 	SinglePrompt(payload PromptPayload) error
+	ChatPrompt(payload PromptPayload) error
 }
 
 type Token = string
@@ -28,6 +31,8 @@ type PromptPayload struct {
 	TopP        float64 `json:"top_p"`
 	TopK        int     `json:"top_k"`
 	Message     string  `json:"message"     validate:"required"`
+	Stream      bool    `json:"stream"`
 	StreamFunc  *func(ctx context.Context, chunk []byte) error
 	Channel     chan string
+	Messages    []llms.MessageContent
 }

@@ -1,4 +1,3 @@
-import * as queries from "@hooks/queries";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import llamaTokenizer from "llama-tokenizer-js";
 import { CheckIcon, CornerDownLeft, Settings } from "lucide-react";
@@ -11,6 +10,8 @@ import { cn } from "@lib/utils";
 import { Models } from "@schemas/models";
 
 import * as playgroundService from "@services/playground";
+
+import * as queries from "@hooks/queries";
 
 import { Badge } from "@components/ui/badge";
 import {

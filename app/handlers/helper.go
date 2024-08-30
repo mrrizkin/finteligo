@@ -1,10 +1,19 @@
 package handlers
 
 import (
+	"bufio"
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizkin/finteligo/app/models"
 	"github.com/mrrizkin/finteligo/system/types"
 )
+
+type StreamResponse struct {
+	ID    string
+	Event string
+	Data  interface{}
+}
 
 func (h *Handlers) GetUser(c *fiber.Ctx) *models.User {
 	userId := c.Locals("uid").(uint)
@@ -26,6 +35,15 @@ func (h *Handlers) SendJson(c *fiber.Ctx, resp types.Response, status ...int) er
 	}
 
 	return c.Status(statusCode).JSON(resp)
+}
+
+func (h *Handlers) SendStream(w *bufio.Writer, resp *StreamResponse) error {
+	_, err := fmt.Fprintf(w, "id: %s\nevent: %s\ndata: %s\n\n", resp.ID, resp.Event, resp.Data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (h *Handlers) GetUserByToken(token string) (*models.User, error) {

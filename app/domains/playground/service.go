@@ -11,11 +11,20 @@ func NewService(lc *langchain.LangChain) *Service {
 	}
 }
 
-func (s *Service) Prompt(
-	token types.Token,
-	payload types.PromptPayload,
-) error {
-	err := s.langchain.Prompt(token, payload)
+func (s *Service) Prompt(payload *PromptPayload) error {
+	promptPayload := types.PromptPayload{
+		Role:        payload.Role,
+		Content:     payload.Content,
+		Model:       payload.Model,
+		Temperature: payload.Temperature,
+		TopP:        payload.TopP,
+		TopK:        payload.TopK,
+		Message:     payload.Message,
+		StreamFunc:  payload.StreamFunc,
+		Channel:     payload.Channel,
+	}
+
+	err := s.langchain.Prompt(payload.Token, promptPayload)
 	if err != nil {
 		return err
 	}

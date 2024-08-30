@@ -8,6 +8,7 @@ import (
 	"github.com/mrrizkin/finteligo/app/domains/playground"
 	"github.com/mrrizkin/finteligo/app/domains/role"
 	"github.com/mrrizkin/finteligo/app/domains/role_permission"
+	"github.com/mrrizkin/finteligo/app/domains/think"
 	"github.com/mrrizkin/finteligo/app/domains/user"
 	"github.com/mrrizkin/finteligo/system/types"
 )
@@ -31,6 +32,9 @@ type Handlers struct {
 
 	rolePermissionRepo    *role_permission.Repo
 	rolePermissionService *role_permission.Service
+
+	thinkRepo    *think.Repo
+	thinkService *think.Service
 
 	roleRepo    *role.Repo
 	roleService *role.Service
@@ -59,6 +63,9 @@ func New(
 	rolePermissionRepo := role_permission.NewRepo(app.System.Database)
 	rolePermissionService := role_permission.NewService(rolePermissionRepo)
 
+	thinkRepo := think.NewRepo()
+	thinkService := think.NewService(thinkRepo, app.Library.LangChain)
+
 	roleRepo := role.NewRepo(app.System.Database)
 	roleService := role.NewService(roleRepo)
 
@@ -84,6 +91,9 @@ func New(
 
 		rolePermissionRepo:    rolePermissionRepo,
 		rolePermissionService: rolePermissionService,
+
+		thinkRepo:    thinkRepo,
+		thinkService: thinkService,
 
 		roleRepo:    roleRepo,
 		roleService: roleService,

@@ -30,6 +30,15 @@ func (lc *LangChain) Prompt(token types.Token, payload types.PromptPayload) erro
 	return llm.Prompt(payload)
 }
 
+func (lc *LangChain) ChatPrompt(token types.Token, payload types.PromptPayload) error {
+	llm, err := lc.store.GetLLM(token)
+	if err != nil {
+		return err
+	}
+
+	return llm.ChatPrompt(payload)
+}
+
 func (lc *LangChain) AddLLM(params types.AddLLMParams) error {
 	storedLLM := models.LangChainLLM{
 		UserID:   params.UserID,

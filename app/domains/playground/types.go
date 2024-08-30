@@ -11,6 +11,5 @@ type Service struct {
 
 type PromptPayload struct {
 	types.PromptPayload
-	Token  types.Token `json:"token"`
-	Stream bool        `json:"stream"`
+	Token types.Token `json:"token"`
 }
