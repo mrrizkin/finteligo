@@ -2,14 +2,20 @@ package role
 
 import (
 	"github.com/mrrizkin/finteligo/app/models"
+	"github.com/mrrizkin/finteligo/system/types"
 )
 
 func NewService(repo *Repo) *Service {
 	return &Service{repo}
 }
 
-func (s *Service) Create(role *models.Role) (*models.Role, error) {
-	err := s.repo.Create(role)
+func (s *Service) Create(payload *RolePayload) (*models.Role, error) {
+	role := &models.Role{
+		Name: payload.Name,
+		Slug: payload.Slug,
+	}
+
+	err := s.repo.Create(role, payload.PermissionIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -17,13 +23,21 @@ func (s *Service) Create(role *models.Role) (*models.Role, error) {
 	return role, nil
 }
 
-func (s *Service) FindAll() ([]models.Role, error) {
-	roles, err := s.repo.FindAll()
+func (s *Service) FindAll(pagination types.Pagination) (*PaginatedRole, error) {
+	roles, err := s.repo.FindAll(pagination)
 	if err != nil {
 		return nil, err
 	}
 
-	return roles, nil
+	rolesCount, err := s.repo.FindAllCount()
+	if err != nil {
+		return nil, err
+	}
+
+	return &PaginatedRole{
+		Result: roles,
+		Total:  int(rolesCount),
+	}, nil
 }
 
 func (s *Service) FindByID(id uint) (*models.Role, error) {
@@ -35,20 +49,21 @@ func (s *Service) FindByID(id uint) (*models.Role, error) {
 	return role, nil
 }
 
-func (s *Service) Update(id uint, role *models.Role) (*models.Role, error) {
-	var err error
-
-	_, err = s.repo.FindByID(id)
+func (s *Service) Update(id uint, role *RolePayload) (*models.Role, error) {
+	exRole, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.repo.Update(role)
+	exRole.Name = role.Name
+	exRole.Slug = role.Slug
+
+	err = s.repo.Update(exRole, role.PermissionIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	return role, nil
+	return exRole, nil
 }
 
 func (s *Service) Delete(id uint) error {

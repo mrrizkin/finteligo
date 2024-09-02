@@ -35,6 +35,15 @@ func (s *Service) FindByID(id uint) (*models.RolePermission, error) {
 	return role_permission, nil
 }
 
+func (s *Service) FindByRoleID(role_id uint) ([]models.RolePermission, error) {
+	role_permissions, err := s.repo.FindByRoleID(role_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return role_permissions, nil
+}
+
 func (s *Service) Update(
 	id uint,
 	role_permission *models.RolePermission,

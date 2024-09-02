@@ -1,8 +1,9 @@
-import * as queries from "@hooks/queries";
 import { ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { Models } from "@schemas/models";
+
+import * as queries from "@hooks/queries";
 
 import {
   Breadcrumb,
@@ -20,7 +21,7 @@ import { Error, Loading } from "@components/partials/utils";
 
 import { ShowModel } from "../components/show";
 
-export default function EditModelPage() {
+export default function HeaderShowModelPage() {
   const { id } = useParams();
   const result = queries.useModel(Number(id || 0));
 

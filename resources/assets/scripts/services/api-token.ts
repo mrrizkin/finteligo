@@ -11,6 +11,8 @@ import {
 const API_API_TOKEN_ALL = "/api/v1/api-tokens";
 const API_API_TOKEN_FIND = "/api/v1/api-tokens/:id";
 const API_API_TOKEN_CREATE = "/api/v1/api-tokens";
+const API_API_TOKEN_ENABLE = "/api/v1/api-tokens/:id/enable";
+const API_API_TOKEN_DISABLE = "/api/v1/api-tokens/:id/disable";
 const API_API_TOKEN_UPDATE = "/api/v1/api-tokens/:id";
 const API_API_TOKEN_DELETE = "/api/v1/api-tokens/:id";
 
@@ -33,6 +35,20 @@ export async function update(id: number, payload: AnyObject) {
   return validate(
     await request.put<ApiTokenResponse>(API_API_TOKEN_UPDATE.replace(":id", id.toString()), payload),
     apiTokenResponseSchema,
+  );
+}
+
+export async function enable(id: number, payload: AnyObject = {}) {
+  return validate(
+    await request.post<StatusResponseSchema>(API_API_TOKEN_ENABLE.replace(":id", id.toString()), payload),
+    statusResponseSchema,
+  );
+}
+
+export async function disable(id: number, payload: AnyObject = {}) {
+  return validate(
+    await request.post<StatusResponseSchema>(API_API_TOKEN_DISABLE.replace(":id", id.toString()), payload),
+    statusResponseSchema,
   );
 }
 

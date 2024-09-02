@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import backendPlugin from "vite-plugin-backend";
 import fullReload from "vite-plugin-full-reload";
 import pageRouter from "vite-plugin-pages";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   resolve: {
@@ -24,7 +25,20 @@ export default defineConfig({
     }),
     fullReload(["tmp/main"]),
     react(),
+    VitePWA({
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,ico}"],
+        cleanupOutdatedCaches: true,
+      },
+      manifest: {
+        name: "Finteligo",
+        short_name: "Finteligo",
+        description: "AI-powered financial analysis",
+        theme_color: "#000000",
+      },
+    }),
     pageRouter({
+      importMode: "async",
       pagesDir: "resources/pages",
       exclude: ["**/components/**/*"],
     }),

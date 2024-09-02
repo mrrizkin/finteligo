@@ -1,10 +1,11 @@
-import * as queries from "@hooks/queries";
 import { PaginationState } from "@tanstack/react-table";
 import * as React from "react";
 
 import { toastValidation } from "@lib/utils";
 
 import * as apiTokenService from "@services/api-token";
+
+import * as queries from "@hooks/queries";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
 
@@ -14,11 +15,14 @@ import { columns, useTable } from "./components/datatable";
 import { FormApiToken, FormApiTokenValues } from "./components/form";
 
 export default function ApiTokenSettingsPage() {
-  const { data: response, refetch } = queries.useApiTokens();
-
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
+  });
+
+  const { data: response, refetch } = queries.useApiTokens({
+    page: pagination.pageIndex + 1,
+    per_page: pagination.pageSize,
   });
 
   const table = useTable({

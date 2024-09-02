@@ -71,6 +71,14 @@ func (s *Service) Update(id uint, apiToken *models.ApiToken) (*models.ApiToken, 
 	return apiToken, nil
 }
 
+func (s *Service) Enable(id uint) (*models.ApiToken, error) {
+	return s.repo.Enable(id)
+}
+
+func (s *Service) Disable(id uint) (*models.ApiToken, error) {
+	return s.repo.Disable(id)
+}
+
 func (s *Service) Delete(id uint) error {
 	return s.repo.Delete(id)
 }

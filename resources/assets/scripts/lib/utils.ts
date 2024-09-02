@@ -52,3 +52,46 @@ export function formatBytes(bytes: number, decimals = 2) {
 
   return `${formattedValue} ${sizes[i]}`;
 }
+
+export function copyTextToClipboard(text: string) {
+  if (navigator.clipboard) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success("Copy text was successfull");
+      })
+      .catch((err) => {
+        toast.error("Copy text was failed");
+        console.error("Async: Could not copy text: ", err);
+      });
+
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.style.position = "fixed";
+  textArea.style.top = "0px";
+  textArea.style.left = "0px";
+  textArea.style.width = "2em";
+  textArea.style.height = "2em";
+  textArea.style.padding = "0px";
+  textArea.style.border = "none";
+  textArea.style.outline = "none";
+  textArea.style.boxShadow = "none";
+  textArea.style.background = "transparent";
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand("copy");
+
+    toast.success("Copy text was successfull");
+  } catch (err) {
+    toast.error("Copy text was failed");
+    console.error("Error copyTextToClipboard: %s", err);
+  }
+
+  document.body.removeChild(textArea);
+}

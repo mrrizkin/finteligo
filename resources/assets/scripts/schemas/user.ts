@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createResponseSchema, createResponsesSchema, generalModelSchema } from "@schemas";
+import { roleSchema } from "@schemas/role";
 
 /** ================================ MODEL ================================= **/
 
@@ -11,6 +12,7 @@ export const userSchema = z
     name: z.string().optional(),
     email: z.string().optional(),
     role_id: z.number().optional(),
+    role: roleSchema.optional().nullable(),
   })
   .merge(generalModelSchema);
 

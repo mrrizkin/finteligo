@@ -25,7 +25,7 @@ func (h *Handlers) GetUser(c *fiber.Ctx) *models.User {
 	return user
 }
 
-func (h *Handlers) SendJson(c *fiber.Ctx, resp types.Response, status ...int) error {
+func (h *Handlers) SendJson(c *fiber.Ctx, resp interface{}, status ...int) error {
 	var statusCode int
 
 	if len(status) == 0 {

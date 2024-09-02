@@ -4,104 +4,70 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mrrizkin/finteligo/app/domains/think/helper"
 	"github.com/mrrizkin/finteligo/app/domains/think/types"
 	"github.com/tmc/langchaingo/llms"
 )
 
-type PPATP struct{}
-
-func NewPPATP() types.PromptTemplate {
-	return &PPATP{}
+type PPATPTemplates struct {
+	systemMessage string
 }
 
-func (*PPATP) GenContent(content ...llms.MessageContent) []llms.MessageContent {
-	message := make([]llms.MessageContent, 0)
-
-	message = append(
-		message,
-		llms.TextParts(
-			llms.ChatMessageTypeSystem,
+func NewPPATPTemplates() types.PromptTemplate {
+	payloadPromptSchema := helper.GenerateSchema(types.PPATP{})
+	responsePromptSchema := helper.GenerateSchema(types.PPATPResponse{})
+	systemMessage :=
+		fmt.Sprintf(
 			`Anda adalah seorang pegawai bank. Anda harus menilai tingkat risiko nasabah berdasarkan skema berikut:
-{
-  "age": integer,
-  "gender": string,
-  "occupation": string,
-  "monthly_income": integer,
-  "location": string,
-  "monthly_transaction_count": integer,
-  "total_monthly_transaction_value": integer,
-  "source_of_funds": string
-  "account_purpose": string
-  "financial_status": string
-  "credit_history": string
-  "legal_history": string
-}
+%s
 
 Anda harus menentukan tingkat risiko nasabah ini (Rendah, Sedang, atau Tinggi) dan memberikan alasannya.
 
 Mohon berikan jawaban Anda dalam format berikut:
-{
-  "risk_level": string,
-  "reasoning": string
-}`,
-		),
-	)
+%s`,
+			payloadPromptSchema,
+			responsePromptSchema,
+		)
 
-	message = append(message, llms.TextParts(llms.ChatMessageTypeGeneric, `{
-  "age": 30,
-  "gender": "laki-laki",
-  "occupation": "engineer",
-  "monthly_income": 10000000,
-  "location": "Jakarta",
-  "monthly_transaction_count": 10,
-  "total_monthly_transaction_value": 10000000,
-  "source_of_funds": "gaji"
-  "account_purpose": "tabungan"
-  "financial_status": "baik"
-  "credit_history": "baik"
-  "legal_history": "bersih"
-}`))
+	return &PPATPTemplates{
+		systemMessage: systemMessage,
+	}
+}
 
-	message = append(message, llms.TextParts(llms.ChatMessageTypeAI, `{
-  "risk_level": "Rendah",
-  "reasoning": "Nasabah memiliki status keuangan yang baik, riwayat kredit yang baik, dan riwayat hukum yang bersih."
-}`))
+func (p *PPATPTemplates) GenContent(content ...llms.MessageContent) []llms.MessageContent {
+	examplePrompt := helper.Encode(types.PPATP{
+		Age:                          30,
+		Gender:                       "laki-laki",
+		Occupation:                   "engineer",
+		MonthlyIncome:                10000000,
+		Location:                     "Jakarta",
+		MonthlyTransactionCount:      10,
+		TotalMonthlyTransactionValue: 10000000,
+		SourceOfFunds:                "gaji",
+		AccountPurpose:               "tabungan",
+		FinancialStatus:              "baik",
+		CreditHistory:                "baik",
+		LegalHistory:                 "bersih",
+	})
 
+	exampleResponse := helper.Encode(types.PPATPResponse{
+		RiskLevel: "Rendah",
+		Reasoning: "Nasabah memiliki status keuangan yang baik, riwayat kredit yang baik, dan riwayat hukum yang bersih.",
+	})
+
+	message := make([]llms.MessageContent, 3)
+	message = append(message, llms.TextParts(llms.ChatMessageTypeSystem, p.systemMessage))
+	message = append(message, llms.TextParts(llms.ChatMessageTypeGeneric, examplePrompt))
+	message = append(message, llms.TextParts(llms.ChatMessageTypeAI, exampleResponse))
 	message = append(message, content...)
 	return message
 }
 
-func (*PPATP) GenMessage(payload interface{}) string {
-	data := payload.(*types.PPATPPayload)
-	return fmt.Sprintf(`{
-  "age": %d,
-  "gender": "%s",
-  "occupation": "%s",
-  "monthly_income": %d,
-  "location": "%s",
-  "monthly_transaction_count": %d,
-  "total_monthly_transaction_value": %d,
-  "source_of_funds": "%s",
-  "account_purpose": "%s",
-  "financial_status": "%s",
-  "credit_history": "%s",
-  "legal_history": "%s",
-}`, data.Age,
-		data.Gender,
-		data.Occupation,
-		data.MonthlyIncome,
-		data.Location,
-		data.MonthlyTransactionCount,
-		data.TotalMonthlyTransactionValue,
-		data.SourceOfFunds,
-		data.AccountPurpose,
-		data.FinancialStatus,
-		data.CreditHistory,
-		data.LegalHistory,
-	)
+func (*PPATPTemplates) GenMessage(payload interface{}) string {
+	return helper.Encode(payload.(*types.PPATP))
 }
 
-func (*PPATP) OutputParser(output string) (interface{}, error) {
+func (*PPATPTemplates) OutputParser(output string) (interface{}, error) {
 	data := new(types.PPATPResponse)
 	err := json.Unmarshal([]byte(output), data)
 	if err != nil {

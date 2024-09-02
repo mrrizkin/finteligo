@@ -10,6 +10,7 @@ import (
 	"github.com/mrrizkin/finteligo/system/session"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/system/validator"
+	"github.com/mrrizkin/finteligo/third_party/argon2"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
@@ -28,7 +29,15 @@ func Run() {
 		panic(err)
 	}
 	defer sess.Stop()
-	model := models.New()
+	argon2 := argon2.New(
+		uint32(conf.HASH_MEMORY),
+		uint32(conf.HASH_ITERATIONS),
+		uint32(conf.HASH_KEY_LEN),
+		uint32(conf.HASH_SALT_LEN),
+		uint8(conf.HASH_PARALLELISM),
+	)
+
+	model := models.New(conf, argon2)
 	db, err := database.New(conf, model, log)
 	if err != nil {
 		panic(err)
@@ -56,6 +65,7 @@ func Run() {
 		},
 		Library: &types.Library{
 			LangChain: lc,
+			Argon2:    argon2,
 		},
 	}, sess)
 

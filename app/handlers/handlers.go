@@ -50,7 +50,7 @@ func New(
 	apiTokenService := api_token.NewService(apiTokenRepo)
 
 	authRepo := auth.NewRepo(app.System.Database)
-	authService := auth.NewService(authRepo)
+	authService := auth.NewService(authRepo, app.Library.Argon2)
 
 	modelsRepo := models.NewRepo(app.System.Database)
 	modelsService := models.NewService(modelsRepo, app.Library.LangChain)
@@ -70,7 +70,7 @@ func New(
 	roleService := role.NewService(roleRepo)
 
 	userRepo := user.NewRepo(app.System.Database)
-	userService := user.NewService(userRepo)
+	userService := user.NewService(userRepo, app.Library.Argon2)
 
 	return &Handlers{
 		App: app,

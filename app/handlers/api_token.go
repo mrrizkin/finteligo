@@ -63,7 +63,7 @@ func (h *Handlers) ApiTokenFindAll(c *fiber.Ctx) error {
 		Title:   "Success",
 		Message: "success get api tokens",
 		Data:    apiTokens.Result,
-		Meta: types.PaginationMeta{
+		Meta: &types.PaginationMeta{
 			Page:      pagination.Page,
 			PerPage:   pagination.PerPage,
 			Total:     apiTokens.Total,
@@ -141,6 +141,60 @@ func (h *Handlers) ApiTokenUpdate(c *fiber.Ctx) error {
 		Status:  "success",
 		Title:   "Success",
 		Message: "success update api token",
+		Data:    apiToken,
+	})
+}
+
+func (h *Handlers) ApiTokenEnable(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
+			Message: "id not valid",
+		}
+	}
+
+	apiToken, err := h.apiTokenService.Enable(uint(id))
+	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed enable api token")
+		return &fiber.Error{
+			Code:    500,
+			Message: "failed enable api token",
+		}
+	}
+
+	return h.SendJson(c, types.Response{
+		Status:  "success",
+		Title:   "Success",
+		Message: "success enable api token",
+		Data:    apiToken,
+	})
+}
+
+func (h *Handlers) ApiTokenDisable(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed to parse id")
+		return &fiber.Error{
+			Code:    400,
+			Message: "id not valid",
+		}
+	}
+
+	apiToken, err := h.apiTokenService.Disable(uint(id))
+	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed disable api token")
+		return &fiber.Error{
+			Code:    500,
+			Message: "failed disable api token",
+		}
+	}
+
+	return h.SendJson(c, types.Response{
+		Status:  "success",
+		Title:   "Success",
+		Message: "success disable api token",
 		Data:    apiToken,
 	})
 }

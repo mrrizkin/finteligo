@@ -20,6 +20,17 @@ type Config struct {
 	LOG_MAX_BACKUP int    `env:"LOG_MAX_BACKUP,default=20"`
 	LOG_JSON       bool   `env:"LOG_JSON,default=true"`
 
+	HASH_MEMORY      int `env:"HASH_MEMORY,default=64"`
+	HASH_ITERATIONS  int `env:"HASH_ITERATIONS,default=10"`
+	HASH_PARALLELISM int `env:"HASH_PARALLELISM,default=2"`
+	HASH_SALT_LEN    int `env:"HASH_SALT_LEN,default=32"`
+	HASH_KEY_LEN     int `env:"HASH_KEY_LEN,default=32"`
+
+	SUPER_ADMIN_NAME     string `env:"SUPER_ADMIN_NAME,required"`
+	SUPER_ADMIN_EMAIL    string `env:"SUPER_ADMIN_EMAIL,required"`
+	SUPER_ADMIN_USERNAME string `env:"SUPER_ADMIN_USERNAME,required"`
+	SUPER_ADMIN_PASSWORD string `env:"SUPER_ADMIN_PASSWORD,required"`
+
 	DB_DRIVER   string `env:"DB_DRIVER,default=sqlite"`
 	DB_HOST     string `env:"DB_HOST,default=./storage/db.sqlite"`
 	DB_PORT     int    `env:"DB_PORT,default=5432"`

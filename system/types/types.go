@@ -7,17 +7,18 @@ import (
 	"github.com/mrrizkin/finteligo/system/database"
 	"github.com/mrrizkin/finteligo/system/session"
 	"github.com/mrrizkin/finteligo/system/validator"
+	"github.com/mrrizkin/finteligo/third_party/argon2"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
 	"github.com/mrrizkin/finteligo/third_party/logger"
 )
 
 type Response struct {
-	Title   string         `json:"title"`
-	Status  string         `json:"status"`
-	Message string         `json:"message"`
-	Debug   string         `json:"debug"`
-	Data    interface{}    `json:"data"`
-	Meta    PaginationMeta `json:"meta"`
+	Title   string          `json:"title"`
+	Status  string          `json:"status"`
+	Message string          `json:"message"`
+	Debug   string          `json:"debug,omitempty"`
+	Data    interface{}     `json:"data"`
+	Meta    *PaginationMeta `json:"meta,omitempty"`
 }
 
 type Pagination struct {
@@ -49,4 +50,5 @@ type System struct {
 
 type Library struct {
 	LangChain *langchain.LangChain
+	Argon2    *argon2.Argon2
 }

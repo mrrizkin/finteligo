@@ -25,6 +25,12 @@ func (r *Repo) FindByID(id uint) (*models.RolePermission, error) {
 	return role_permission, err
 }
 
+func (r *Repo) FindByRoleID(role_id uint) ([]models.RolePermission, error) {
+	role_permissions := make([]models.RolePermission, 0)
+	err := r.db.Where("role_id = ?", role_id).Find(&role_permissions).Error
+	return role_permissions, err
+}
+
 func (r *Repo) Update(role_permission *models.RolePermission) error {
 	return r.db.Save(role_permission).Error
 }

@@ -17,6 +17,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/tmc/langchaingo v0.1.12
 	github.com/valyala/fasthttp v1.55.0
+	golang.org/x/crypto v0.26.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.9
@@ -53,7 +54,6 @@ require (
 	github.com/tinylib/msgp v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect

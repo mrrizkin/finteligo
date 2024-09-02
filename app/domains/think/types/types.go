@@ -17,22 +17,26 @@ type PromptPayload struct {
 	Stream bool        `json:"stream"`
 }
 
+type PPATP struct {
+	Age                          int    `json:"age"                             validate:"required"`
+	Gender                       string `json:"gender"                          validate:"required"`
+	Occupation                   string `json:"occupation"`
+	MonthlyIncome                int    `json:"monthly_income"                  validate:"required"`
+	Location                     string `json:"location"                        validate:"required"`
+	MonthlyTransactionCount      int    `json:"monthly_transaction_count"       validate:"required"`
+	TotalMonthlyTransactionValue int    `json:"total_monthly_transaction_value" validate:"required"`
+	SourceOfFunds                string `json:"source_of_funds"`
+	AccountPurpose               string `json:"account_purpose"`
+	FinancialStatus              string `json:"financial_status"`
+	CreditHistory                string `json:"credit_history"`
+	LegalHistory                 string `json:"legal_history"`
+}
+
 type PPATPPayload struct {
 	types.PromptPayload
-	Token                        types.Token `json:"token"`
-	Stream                       bool        `json:"stream"`
-	Age                          int         `json:"age"                             validate:"required"`
-	Gender                       string      `json:"gender"                          validate:"required"`
-	Occupation                   string      `json:"occupation"`
-	MonthlyIncome                int         `json:"monthly_income"                  validate:"required"`
-	Location                     string      `json:"location"                        validate:"required"`
-	MonthlyTransactionCount      int         `json:"monthly_transaction_count"       validate:"required"`
-	TotalMonthlyTransactionValue int         `json:"total_monthly_transaction_value" validate:"required"`
-	SourceOfFunds                string      `json:"source_of_funds"`
-	AccountPurpose               string      `json:"account_purpose"`
-	FinancialStatus              string      `json:"financial_status"`
-	CreditHistory                string      `json:"credit_history"`
-	LegalHistory                 string      `json:"legal_history"`
+	Token  types.Token `json:"token"`
+	Stream bool        `json:"stream"`
+	Data   PPATP       `json:"data"`
 }
 
 type PPATPResponse struct {

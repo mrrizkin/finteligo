@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
 import {
   Breadcrumb,
@@ -11,7 +11,11 @@ import {
 
 import Header from "@components/partials/header";
 
+import { Show } from "@components/show";
+
 export default function SettingsPage() {
+  const location = useLocation();
+
   return (
     <div className="flex flex-col">
       <Header>
@@ -67,6 +71,25 @@ export default function SettingsPage() {
                 className={({ isActive }) => (isActive ? "font-semibold text-primary" : "")}>
                 Advanced
               </NavLink>
+              <Show when={location.pathname.includes("/dashboard/settings/advanced")}>
+                <nav className="grid gap-4 pl-4 text-sm text-muted-foreground" x-chunk="dashboard-04-chunk-0">
+                  <NavLink
+                    to="/dashboard/settings/advanced/users"
+                    className={({ isActive }) => (isActive ? "font-semibold text-primary" : "")}>
+                    Manage Users
+                  </NavLink>
+                  <NavLink
+                    to="/dashboard/settings/advanced/roles"
+                    className={({ isActive }) => (isActive ? "font-semibold text-primary" : "")}>
+                    Manage Roles
+                  </NavLink>
+                  <NavLink
+                    to="/dashboard/settings/advanced/plans"
+                    className={({ isActive }) => (isActive ? "font-semibold text-primary" : "")}>
+                    Subscription Plan
+                  </NavLink>
+                </nav>
+              </Show>
             </nav>
             <Outlet />
           </div>

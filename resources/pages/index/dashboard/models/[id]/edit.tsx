@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as queries from "@hooks/queries";
 import { ChevronLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { Models } from "@schemas/models";
+
+import * as queries from "@hooks/queries";
 
 import {
   Breadcrumb,
@@ -22,7 +23,7 @@ import { Error, Loading } from "@components/partials/utils";
 
 import { FormModel, FormModelValues, formSchema } from "../components/form";
 
-export default function EditModelPage() {
+export default function HeaderEditModelPage() {
   const { id } = useParams();
   const result = queries.useModel(Number(id || 0));
 
@@ -79,10 +80,10 @@ function Conditional(props: { result: ReturnType<typeof queries.useModel> }) {
     return <div>Model data is empty</div>;
   }
 
-  return <FormEditModelPage data={response!.data.data!} />;
+  return <EditModelPage data={response!.data.data!} />;
 }
 
-function FormEditModelPage({ data }: { data: Models }) {
+function EditModelPage({ data }: { data: Models }) {
   const navigate = useNavigate();
   const form = useForm<FormModelValues>({
     resolver: zodResolver(formSchema),

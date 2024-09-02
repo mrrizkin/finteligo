@@ -59,7 +59,7 @@ func (h *Handlers) ModelsFindAll(c *fiber.Ctx) error {
 		Title:   "Success",
 		Message: "success get modelss",
 		Data:    modelss.Result,
-		Meta: types.PaginationMeta{
+		Meta: &types.PaginationMeta{
 			Page:      pagination.Page,
 			PerPage:   pagination.PerPage,
 			Total:     modelss.Total,

@@ -16,7 +16,7 @@ export function ShowModel({ data, children }: FormModelProps) {
         <Card x-chunk="dashboard-07-chunk-0">
           <CardHeader>
             <CardTitle>Model Detail</CardTitle>
-            <CardDescription>Input the details of the model.</CardDescription>
+            <CardDescription>The details of the model.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6">

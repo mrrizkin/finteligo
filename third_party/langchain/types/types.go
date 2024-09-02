@@ -26,11 +26,10 @@ type AddLLMParams struct {
 type PromptPayload struct {
 	Role        string  `json:"role"`
 	Content     string  `json:"content"`
-	Model       string  `json:"model"       validate:"required"`
 	Temperature float64 `json:"temperature"`
 	TopP        float64 `json:"top_p"`
 	TopK        int     `json:"top_k"`
-	Message     string  `json:"message"     validate:"required"`
+	Message     string  `json:"message"`
 	Stream      bool    `json:"stream"`
 	StreamFunc  *func(ctx context.Context, chunk []byte) error
 	Channel     chan string

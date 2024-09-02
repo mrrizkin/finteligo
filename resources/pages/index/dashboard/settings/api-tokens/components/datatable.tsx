@@ -7,10 +7,15 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Ban, Clipboard, Ellipsis, Trash } from "lucide-react";
+import { Clipboard, Ellipsis, LockKeyhole, LockKeyholeOpen, Trash } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
+
+import { copyTextToClipboard, toastValidation } from "@lib/utils";
 
 import { ApiToken } from "@schemas/api-token";
+
+import * as apiTokenService from "@services/api-token";
 
 import { Button } from "@components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
@@ -45,6 +50,38 @@ export function useTable(props: UseTableProps) {
       pagination: props.pagination,
       columnVisibility,
       rowSelection,
+    },
+  });
+}
+
+function copyTokenToClipboard(id: number) {
+  toastValidation(apiTokenService.find(id), {
+    success(data) {
+      copyTextToClipboard(data.data?.token || "token not found");
+    },
+  });
+}
+
+function disableAPIToken(id: number) {
+  toastValidation(apiTokenService.disable(id), {
+    success() {
+      toast.success("API token sucessfully disabled");
+    },
+  });
+}
+
+function enableAPIToken(id: number) {
+  toastValidation(apiTokenService.enable(id), {
+    success() {
+      toast.success("API token sucessfully enabled");
+    },
+  });
+}
+
+function deleteAPIToken(id: number) {
+  toastValidation(apiTokenService.remove(id), {
+    success() {
+      toast.success("API token sucessfully deleted");
     },
   });
 }
@@ -114,7 +151,7 @@ export const columns: ColumnDef<ApiToken>[] = [
       return <DataTableColumnHeader column={column} title="" />;
     },
     enableHiding: false,
-    cell: () => {
+    cell: ({ row }) => {
       return (
         <div className="space-x-2">
           <DropdownMenu>
@@ -124,15 +161,22 @@ export const columns: ColumnDef<ApiToken>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => copyTokenToClipboard(row.original.id || 0)}>
                 <Clipboard className="mr-2 size-4" />
                 Copy To Clipboard
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Ban className="mr-2 size-4" />
-                Disable API Token
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              {row.original.enabled ? (
+                <DropdownMenuItem onClick={() => disableAPIToken(row.original.id || 0)}>
+                  <LockKeyhole className="mr-2 size-4" />
+                  Disable API Token
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => enableAPIToken(row.original.id || 0)}>
+                  <LockKeyholeOpen className="mr-2 size-4" />
+                  Enable API Token
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => deleteAPIToken(row.original.id || 0)}>
                 <Trash className="mr-2 size-4" />
                 Delete API Token
               </DropdownMenuItem>

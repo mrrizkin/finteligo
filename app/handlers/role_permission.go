@@ -71,6 +71,13 @@ func (h *Handlers) RolePermissionFindByID(c *fiber.Ctx) error {
 
 	rolePermission, err := h.rolePermissionService.FindByID(uint(id))
 	if err != nil {
+		if err.Error() == "record not found" {
+			return &fiber.Error{
+				Code:    404,
+				Message: "role permission not found",
+			}
+		}
+
 		h.System.Logger.Error().Err(err).Msg("failed get role permission")
 		return &fiber.Error{
 			Code:    500,
@@ -79,7 +86,40 @@ func (h *Handlers) RolePermissionFindByID(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
+		Status:  "success",
+		Title:   "Success",
+		Message: "success get role permission",
+		Data:    rolePermission,
+	})
+}
 
+func (h *Handlers) RolePermissionFindByRoleID(c *fiber.Ctx) error {
+	roleID, err := c.ParamsInt("role_id")
+	if err != nil {
+		h.System.Logger.Error().Err(err).Msg("failed to parse role_id")
+		return &fiber.Error{
+			Code:    400,
+			Message: "role_id not valid",
+		}
+	}
+
+	rolePermission, err := h.rolePermissionService.FindByRoleID(uint(roleID))
+	if err != nil {
+		if err.Error() == "record not found" {
+			return &fiber.Error{
+				Code:    404,
+				Message: "role permission not found",
+			}
+		}
+
+		h.System.Logger.Error().Err(err).Msg("failed get role permissions")
+		return &fiber.Error{
+			Code:    500,
+			Message: "failed get role permissions",
+		}
+	}
+
+	return h.SendJson(c, types.Response{
 		Status:  "success",
 		Title:   "Success",
 		Message: "success get role permission",

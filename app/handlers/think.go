@@ -168,7 +168,7 @@ func (h *Handlers) AskAI(c *fiber.Ctx) error {
 			return validationError
 		}
 
-		messsage = h.thinkService.GenerateMessage(useCase, payload)
+		messsage = h.thinkService.GenerateMessage(useCase, &payload.Data)
 
 	default:
 		return &fiber.Error{

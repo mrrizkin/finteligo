@@ -4,6 +4,10 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"github.com/mrrizkin/finteligo/app/config"
+	"github.com/mrrizkin/finteligo/app/utils"
+	"github.com/mrrizkin/finteligo/third_party/argon2"
 )
 
 type User struct {
@@ -19,22 +23,47 @@ type User struct {
 	Role      Role           `json:"role"       gorm:"foreignKey:RoleID;references:ID"`
 }
 
-func (*User) Seed(db *gorm.DB) {
+func (*User) Seed(
+	config *config.Config,
+	argon2 *argon2.Argon2,
+	db *gorm.DB,
+) {
 	var adminRole Role
-	db.Where("slug = ?", "admin").First(&adminRole)
+	db.Where("slug = ?", "super_admin").First(&adminRole)
 
-	username := "super_mimin"
-	password := "super_mimin"
-	email := "m-super-admin@mail.com"
-	name := "Administrator"
+	username := config.SUPER_ADMIN_USERNAME
+	password := config.SUPER_ADMIN_PASSWORD
+	hash, err := argon2.GenerateHashPassword(password)
+	if err != nil {
+		panic(err)
+	}
+
+	email := config.SUPER_ADMIN_EMAIL
+	name := config.SUPER_ADMIN_NAME
 
 	user := User{
 		Username: &username,
-		Password: &password,
+		Password: &hash,
 		Email:    &email,
 		Name:     &name,
 		RoleID:   &adminRole.ID,
 	}
 
-	db.FirstOrCreate(&User{}, user)
+	userExist := new(User)
+	wb := utils.NewWhereBuilder()
+	wb.And("username = ?", username)
+	wb.And("email = ?", email)
+	wb.And("role_id = ?", adminRole.ID)
+	wb.And("deleted_at IS NULL")
+	where, whereArgs := wb.Get()
+
+	err = db.Where(where, whereArgs...).
+		First(userExist).
+		Error
+
+	if err == nil {
+		return
+	}
+
+	db.Create(&user)
 }

@@ -18,5 +18,5 @@ type ApiToken struct {
 	ExpiryDate *time.Time     `json:"expiry_date"`
 	Expired    bool           `json:"expired"`
 	Enabled    bool           `json:"enabled"`
-	User       User           `json:"user"        gorm:"foreignKey:UserId;references:ID"`
+	User       *User          `json:"user"        gorm:"foreignKey:UserId;references:ID"`
 }

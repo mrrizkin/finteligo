@@ -12,7 +12,7 @@ type Repo struct {
 
 func NewRepo() *Repo {
 	templates := map[string]types.PromptTemplate{
-		"ppatp": templates.NewPPATP(),
+		"ppatp": templates.NewPPATPTemplates(),
 	}
 
 	return &Repo{

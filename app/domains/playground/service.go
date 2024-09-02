@@ -15,7 +15,6 @@ func (s *Service) Prompt(payload *PromptPayload) error {
 	promptPayload := types.PromptPayload{
 		Role:        payload.Role,
 		Content:     payload.Content,
-		Model:       payload.Model,
 		Temperature: payload.Temperature,
 		TopP:        payload.TopP,
 		TopK:        payload.TopK,

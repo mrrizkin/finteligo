@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import * as authService from "@services/auth";
 
+import ReloadPrompt from "@components/partials/reload-prompt";
 import { Error } from "@components/partials/utils";
 
 import Loading from "@components/loading";
@@ -28,5 +29,10 @@ export default function IndexPage() {
     return <Navigate to="/dashboard" />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <ReloadPrompt />
+    </>
+  );
 }

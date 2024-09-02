@@ -41,7 +41,8 @@ func (h *Handlers) UserCreate(c *fiber.Ctx) error {
 }
 
 func (h *Handlers) UserFindAll(c *fiber.Ctx) error {
-	users, err := h.userService.FindAll()
+	pagination := h.GetPaginationQuery(c)
+	users, err := h.userService.FindAll(pagination)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed get users")
 		return &fiber.Error{
@@ -54,7 +55,13 @@ func (h *Handlers) UserFindAll(c *fiber.Ctx) error {
 		Status:  "success",
 		Title:   "Success",
 		Message: "success get users",
-		Data:    users,
+		Data:    users.Result,
+		Meta: &types.PaginationMeta{
+			Page:      pagination.Page,
+			PerPage:   pagination.PerPage,
+			Total:     users.Total,
+			PageCount: users.Total / pagination.PerPage,
+		},
 	})
 }
 
@@ -70,6 +77,13 @@ func (h *Handlers) UserFindByID(c *fiber.Ctx) error {
 
 	user, err := h.userService.FindByID(uint(id))
 	if err != nil {
+		if err.Error() == "record not found" {
+			return &fiber.Error{
+				Code:    404,
+				Message: "user not found",
+			}
+		}
+
 		h.System.Logger.Error().Err(err).Msg("failed get user")
 		return &fiber.Error{
 			Code:    500,
@@ -134,6 +148,21 @@ func (h *Handlers) UserDelete(c *fiber.Ctx) error {
 		return &fiber.Error{
 			Code:    400,
 			Message: "id not valid",
+		}
+	}
+
+	user := h.GetUser(c)
+	if user == nil {
+		return &fiber.Error{
+			Code:    401,
+			Message: "unauthorized",
+		}
+	}
+
+	if user.ID == uint(id) {
+		return &fiber.Error{
+			Code:    400,
+			Message: "cannot delete yourself",
 		}
 	}
 

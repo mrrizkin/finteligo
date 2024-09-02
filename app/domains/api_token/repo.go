@@ -48,6 +48,30 @@ func (r *Repo) FindByToken(token string) (*models.ApiToken, error) {
 	return apiToken, err
 }
 
+func (r *Repo) Enable(id uint) (*models.ApiToken, error) {
+	apiToken := new(models.ApiToken)
+	err := r.db.First(apiToken, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	apiToken.Enabled = true
+	err = r.Update(apiToken)
+	return apiToken, err
+}
+
+func (r *Repo) Disable(id uint) (*models.ApiToken, error) {
+	apiToken := new(models.ApiToken)
+	err := r.db.First(apiToken, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	apiToken.Enabled = false
+	err = r.Update(apiToken)
+	return apiToken, err
+}
+
 func (r *Repo) Update(apiToken *models.ApiToken) error {
 	return r.db.Save(apiToken).Error
 }

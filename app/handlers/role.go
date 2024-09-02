@@ -3,12 +3,12 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/mrrizkin/finteligo/app/models"
+	"github.com/mrrizkin/finteligo/app/domains/role"
 	"github.com/mrrizkin/finteligo/system/types"
 )
 
 func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
-	payload := new(models.Role)
+	payload := new(role.RolePayload)
 	err := c.BodyParser(payload)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
@@ -33,7 +33,6 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
 		Message: "success create role",
@@ -42,7 +41,8 @@ func (h *Handlers) RoleCreate(c *fiber.Ctx) error {
 }
 
 func (h *Handlers) RoleFindAll(c *fiber.Ctx) error {
-	roles, err := h.roleService.FindAll()
+	pagination := h.GetPaginationQuery(c)
+	roles, err := h.roleService.FindAll(pagination)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed get roles")
 		return &fiber.Error{
@@ -52,11 +52,16 @@ func (h *Handlers) RoleFindAll(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
 		Message: "success get roles",
-		Data:    roles,
+		Data:    roles.Result,
+		Meta: &types.PaginationMeta{
+			Page:      pagination.Page,
+			PerPage:   pagination.PerPage,
+			Total:     roles.Total,
+			PageCount: roles.Total / pagination.PerPage,
+		},
 	})
 }
 
@@ -72,6 +77,13 @@ func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
 
 	role, err := h.roleService.FindByID(uint(id))
 	if err != nil {
+		if err.Error() == "record not found" {
+			return &fiber.Error{
+				Code:    404,
+				Message: "role not found",
+			}
+		}
+
 		h.System.Logger.Error().Err(err).Msg("failed get role")
 		return &fiber.Error{
 			Code:    500,
@@ -80,7 +92,6 @@ func (h *Handlers) RoleFindByID(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
 		Message: "success get role",
@@ -98,7 +109,7 @@ func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
 		}
 	}
 
-	payload := new(models.Role)
+	payload := new(role.RolePayload)
 	err = c.BodyParser(payload)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed to parse payload")
@@ -123,7 +134,6 @@ func (h *Handlers) RoleUpdate(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
 		Message: "success update role",
@@ -151,7 +161,6 @@ func (h *Handlers) RoleDelete(c *fiber.Ctx) error {
 	}
 
 	return h.SendJson(c, types.Response{
-
 		Status:  "success",
 		Title:   "Success",
 		Message: "success delete role",

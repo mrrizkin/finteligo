@@ -16,6 +16,8 @@ func ApiRoutes(api fiber.Router, handler *handlers.Handlers) {
 	v1.Get("/api-tokens", handler.ApiTokenFindAll)
 	v1.Get("/api-tokens/:id", handler.ApiTokenFindByID)
 	v1.Post("/api-tokens", handler.ApiTokenCreate)
+	v1.Post("/api-tokens/:id/disable", handler.ApiTokenDisable)
+	v1.Post("/api-tokens/:id/enable", handler.ApiTokenEnable)
 	v1.Put("/api-tokens/:id", handler.ApiTokenUpdate)
 	v1.Delete("/api-tokens/:id", handler.ApiTokenDelete)
 

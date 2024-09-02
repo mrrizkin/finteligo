@@ -24,7 +24,6 @@ func (s *Service) AskAI(useCase string, payload *types.PromptPayload) error {
 	promptPayload := lcTypes.PromptPayload{
 		Role:        payload.Role,
 		Content:     payload.Content,
-		Model:       payload.Model,
 		Temperature: payload.Temperature,
 		TopP:        payload.TopP,
 		TopK:        payload.TopK,
