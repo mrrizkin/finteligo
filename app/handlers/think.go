@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizkin/finteligo/app/domains/think"
+	"github.com/mrrizkin/finteligo/app/domains/think/templates"
 	ttypes "github.com/mrrizkin/finteligo/app/domains/think/types"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/logger"
@@ -154,7 +155,7 @@ func (h *Handlers) AskAI(c *fiber.Ctx) error {
 
 	switch useCase {
 	case "ppatp":
-		payload := new(ttypes.PPATPPayload)
+		payload := new(templates.PPATPPayload)
 		err := c.BodyParser(payload)
 		if err != nil {
 			h.System.Logger.Error().Err(err).Msg("failed to parse payload")

@@ -2,6 +2,8 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+
 	"github.com/mrrizkin/finteligo/app/handlers"
 	"github.com/mrrizkin/finteligo/routes/middleware"
 )
@@ -11,7 +13,10 @@ func ApiRoutes(api fiber.Router, handler *handlers.Handlers) {
 	api.Post("/login", handler.Login)
 	api.Post("/logout", handler.Logout)
 
-	v1 := api.Group("/v1", middleware.AuthProtected(handler.App, handler))
+	v1 := api.Group("/v1", cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept, finteligo-api-token",
+	}), middleware.AuthProtected(handler.App, handler))
 
 	v1.Get("/api-tokens", handler.ApiTokenFindAll)
 	v1.Get("/api-tokens/:id", handler.ApiTokenFindByID)

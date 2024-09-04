@@ -6,16 +6,48 @@ import (
 
 	"github.com/mrrizkin/finteligo/app/domains/think/helper"
 	"github.com/mrrizkin/finteligo/app/domains/think/types"
+	lctypes "github.com/mrrizkin/finteligo/third_party/langchain/types"
 	"github.com/tmc/langchaingo/llms"
 )
+
+type PPATP struct {
+	Age                  int    `json:"age"`
+	Gender               string `json:"gender"`
+	MaritalStatus        string `json:"marital_status"`
+	IsStaffBank          bool   `json:"is_staff_bank"`
+	CustomerIdentifier   string `json:"customer_identifier"`
+	Citizenship          string `json:"citizenship"`
+	DebtorClassification string `json:"debtor_classification"`
+	EmploymentStatus     string `json:"employment_status"`
+	BusinessField        string `json:"business_field"`
+	EmploymentLength     string `json:"employment_length"`
+	SourceOfFunds        string `json:"source_of_funds"`
+	IncomeRange          string `json:"income_range"`
+	MonthlyIncome        int    `json:"monthly_income"`
+	Expenditure          int    `json:"expenditure"`
+	AccountPurpose       string `json:"account_purpose"`
+	MonthlyTransaction   string `json:"monthly_transaction"`
+}
+
+type PPATPPayload struct {
+	types.PromptPayload
+	Token  lctypes.Token `json:"token"`
+	Stream bool          `json:"stream"`
+	Data   PPATP         `json:"data"`
+}
+
+type PPATPResponse struct {
+	RiskLevel string `json:"risk_level"`
+	Reasoning string `json:"reasoning"`
+}
 
 type PPATPTemplates struct {
 	systemMessage string
 }
 
 func NewPPATPTemplates() types.PromptTemplate {
-	payloadPromptSchema := helper.GenerateSchema(types.PPATP{})
-	responsePromptSchema := helper.GenerateSchema(types.PPATPResponse{})
+	payloadPromptSchema := helper.GenerateSchema(PPATP{})
+	responsePromptSchema := helper.GenerateSchema(PPATPResponse{})
 	systemMessage :=
 		fmt.Sprintf(
 			`Anda adalah seorang pegawai bank. Anda harus menilai tingkat risiko nasabah berdasarkan skema berikut:
@@ -35,24 +67,28 @@ Mohon berikan jawaban Anda dalam format berikut:
 }
 
 func (p *PPATPTemplates) GenContent(content ...llms.MessageContent) []llms.MessageContent {
-	examplePrompt := helper.Encode(types.PPATP{
-		Age:                          30,
-		Gender:                       "laki-laki",
-		Occupation:                   "engineer",
-		MonthlyIncome:                10000000,
-		Location:                     "Jakarta",
-		MonthlyTransactionCount:      10,
-		TotalMonthlyTransactionValue: 10000000,
-		SourceOfFunds:                "gaji",
-		AccountPurpose:               "tabungan",
-		FinancialStatus:              "baik",
-		CreditHistory:                "baik",
-		LegalHistory:                 "bersih",
+	examplePrompt := helper.Encode(PPATP{
+		Age:                  30,
+		Gender:               "laki-laki",
+		MaritalStatus:        "menikah",
+		IsStaffBank:          false,
+		CustomerIdentifier:   "123456",
+		Citizenship:          "WNI",
+		DebtorClassification: "A",
+		EmploymentStatus:     "Karyawan",
+		BusinessField:        "IT",
+		EmploymentLength:     "1-3 tahun",
+		SourceOfFunds:        "Gaji",
+		IncomeRange:          "10-20 juta",
+		MonthlyIncome:        10000000,
+		Expenditure:          5000000,
+		AccountPurpose:       "Tabungan",
+		MonthlyTransaction:   "1-5 juta",
 	})
 
-	exampleResponse := helper.Encode(types.PPATPResponse{
+	exampleResponse := helper.Encode(PPATPResponse{
 		RiskLevel: "Rendah",
-		Reasoning: "Nasabah memiliki status keuangan yang baik, riwayat kredit yang baik, dan riwayat hukum yang bersih.",
+		Reasoning: "Nasabah memiliki pekerjaan tetap dengan penghasilan yang stabil, dan pengeluaran yang terkontrol.",
 	})
 
 	message := make([]llms.MessageContent, 3)
@@ -64,11 +100,11 @@ func (p *PPATPTemplates) GenContent(content ...llms.MessageContent) []llms.Messa
 }
 
 func (*PPATPTemplates) GenMessage(payload interface{}) string {
-	return helper.Encode(payload.(*types.PPATP))
+	return helper.Encode(payload.(*PPATP))
 }
 
 func (*PPATPTemplates) OutputParser(output string) (interface{}, error) {
-	data := new(types.PPATPResponse)
+	data := new(PPATPResponse)
 	err := json.Unmarshal([]byte(output), data)
 	if err != nil {
 		return nil, err
