@@ -34,7 +34,7 @@ func (s *Service) FindAll(
 ) (*PaginatedApiToken, error) {
 	wb := utils.NewWhereBuilder()
 
-	wb.And("user_id", user.ID)
+	wb.And("user_id = ?", user.ID)
 
 	where, whereArgs := wb.Get()
 
