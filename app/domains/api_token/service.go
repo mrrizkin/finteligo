@@ -3,6 +3,7 @@ package api_token
 import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/mrrizkin/finteligo/app/models"
+	"github.com/mrrizkin/finteligo/app/utils"
 	"github.com/mrrizkin/finteligo/system/types"
 )
 
@@ -10,7 +11,7 @@ func NewService(repo *Repo) *Service {
 	return &Service{repo}
 }
 
-func (s *Service) Create(apiToken *models.ApiToken, user *models.User) (*models.ApiToken, error) {
+func (s *Service) Create(user *models.User, apiToken *models.ApiToken) (*models.ApiToken, error) {
 	token, err := generateToken()
 	if err != nil {
 		return nil, err
@@ -27,8 +28,22 @@ func (s *Service) Create(apiToken *models.ApiToken, user *models.User) (*models.
 	return apiToken, nil
 }
 
-func (s *Service) FindAll(pagination types.Pagination) (*PaginatedApiToken, error) {
-	apiTokens, err := s.repo.FindAll(pagination)
+func (s *Service) FindAll(
+	user *models.User,
+	pagination types.Pagination,
+) (*PaginatedApiToken, error) {
+	wb := utils.NewWhereBuilder()
+
+	wb.And("user_id", user.ID)
+
+	where, whereArgs := wb.Get()
+
+	filter := types.Filter{
+		Where:     where,
+		WhereArgs: whereArgs,
+	}
+
+	apiTokens, err := s.repo.FindAll(pagination, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +52,7 @@ func (s *Service) FindAll(pagination types.Pagination) (*PaginatedApiToken, erro
 		apiTokens[i].Token = apiTokens[i].Token[:12] + "..." + apiTokens[i].Token[len(apiTokens[i].Token)-4:]
 	}
 
-	apiTokensCount, err := s.repo.FindAllCount()
+	apiTokensCount, err := s.repo.FindAllCount(filter)
 	if err != nil {
 		return nil, err
 	}

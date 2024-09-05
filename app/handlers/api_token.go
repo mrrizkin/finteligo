@@ -30,7 +30,7 @@ func (h *Handlers) ApiTokenCreate(c *fiber.Ctx) error {
 		}
 	}
 
-	apiToken, err := h.apiTokenService.Create(payload, user)
+	apiToken, err := h.apiTokenService.Create(user, payload)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed create apiToken")
 		return &fiber.Error{
@@ -48,8 +48,16 @@ func (h *Handlers) ApiTokenCreate(c *fiber.Ctx) error {
 }
 
 func (h *Handlers) ApiTokenFindAll(c *fiber.Ctx) error {
+	user := h.GetUser(c)
+	if user == nil {
+		return &fiber.Error{
+			Code:    401,
+			Message: "Unauthorized",
+		}
+	}
+
 	pagination := h.GetPaginationQuery(c)
-	apiTokens, err := h.apiTokenService.FindAll(pagination)
+	apiTokens, err := h.apiTokenService.FindAll(user, pagination)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed get apiTokens")
 		return &fiber.Error{

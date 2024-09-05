@@ -16,10 +16,12 @@ func (r *Repo) Create(apiToken *models.ApiToken) error {
 
 func (r *Repo) FindAll(
 	pagination types.Pagination,
+	filter types.Filter,
 ) ([]models.ApiToken, error) {
 	apiTokens := make([]models.ApiToken, 0)
 	err := r.db.
 		Preload("User").
+		Where(filter.Where, filter.WhereArgs...).
 		Offset((pagination.Page - 1) * pagination.PerPage).
 		Limit(pagination.PerPage).
 		Find(&apiTokens).Error
@@ -30,9 +32,14 @@ func (r *Repo) FindAll(
 	return apiTokens, err
 }
 
-func (r *Repo) FindAllCount() (int64, error) {
+func (r *Repo) FindAllCount(
+	filter types.Filter,
+) (int64, error) {
 	var count int64 = 0
-	err := r.db.Model(&models.ApiToken{}).Count(&count).Error
+	err := r.db.Model(&models.ApiToken{}).
+		Where(filter.Where, filter.WhereArgs...).
+		Count(&count).
+		Error
 	return count, err
 }
 

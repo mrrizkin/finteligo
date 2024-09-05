@@ -3,6 +3,7 @@ package models
 import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/mrrizkin/finteligo/app/models"
+	"github.com/mrrizkin/finteligo/app/utils"
 	"github.com/mrrizkin/finteligo/system/types"
 	"github.com/mrrizkin/finteligo/third_party/langchain"
 	lcTypes "github.com/mrrizkin/finteligo/third_party/langchain/types"
@@ -42,14 +43,26 @@ func (s *Service) Create(langChainLLM *models.LangChainLLM) (*models.LangChainLL
 }
 
 func (s *Service) FindAll(
+	user *models.User,
 	pagination types.Pagination,
 ) (*PaginatedModels, error) {
-	langChainLLMs, err := s.repo.FindAll(pagination)
+	wb := utils.NewWhereBuilder()
+
+	wb.And("user_id", user.ID)
+
+	where, whereArgs := wb.Get()
+
+	filter := types.Filter{
+		Where:     where,
+		WhereArgs: whereArgs,
+	}
+
+	langChainLLMs, err := s.repo.FindAll(pagination, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	langChainLLMsCount, err := s.repo.FindAllCount()
+	langChainLLMsCount, err := s.repo.FindAllCount(filter)
 	if err != nil {
 		return nil, err
 	}

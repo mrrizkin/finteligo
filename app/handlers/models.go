@@ -22,9 +22,15 @@ func (h *Handlers) ModelsCreate(c *fiber.Ctx) error {
 		return validationError
 	}
 
-	if payload.UserID == 0 {
-		payload.UserID = 1
+	user := h.GetUser(c)
+	if user == nil {
+		return &fiber.Error{
+			Code:    401,
+			Message: "unauthorized",
+		}
 	}
+
+	payload.UserID = user.ID
 
 	models, err := h.modelsService.Create(payload)
 	if err != nil {
@@ -44,8 +50,16 @@ func (h *Handlers) ModelsCreate(c *fiber.Ctx) error {
 }
 
 func (h *Handlers) ModelsFindAll(c *fiber.Ctx) error {
+	user := h.GetUser(c)
+	if user == nil {
+		return &fiber.Error{
+			Code:    401,
+			Message: "unauthorized",
+		}
+	}
+
 	pagination := h.GetPaginationQuery(c)
-	modelss, err := h.modelsService.FindAll(pagination)
+	modelss, err := h.modelsService.FindAll(user, pagination)
 	if err != nil {
 		h.System.Logger.Error().Err(err).Msg("failed get modelss")
 		return &fiber.Error{

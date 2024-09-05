@@ -26,6 +26,11 @@ type Pagination struct {
 	PerPage int `json:"per_page"`
 }
 
+type Filter struct {
+	Where     string
+	WhereArgs []interface{}
+}
+
 type PaginationMeta struct {
 	Page      int `json:"page"`
 	PerPage   int `json:"per_page"`

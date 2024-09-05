@@ -16,9 +16,11 @@ func (r *Repo) Create(langChainLLM *models.LangChainLLM) error {
 
 func (r *Repo) FindAll(
 	pagination types.Pagination,
+	filter types.Filter,
 ) ([]models.LangChainLLM, error) {
 	langChainLLMs := make([]models.LangChainLLM, 0)
 	err := r.db.
+		Where(filter.Where, filter.WhereArgs...).
 		Offset((pagination.Page - 1) * pagination.PerPage).
 		Limit(pagination.PerPage).
 		Find(&langChainLLMs).Error
@@ -29,9 +31,14 @@ func (r *Repo) FindAll(
 	return langChainLLMs, err
 }
 
-func (r *Repo) FindAllCount() (int64, error) {
+func (r *Repo) FindAllCount(
+	filter types.Filter,
+) (int64, error) {
 	var count int64 = 0
-	err := r.db.Model(&models.LangChainLLM{}).Count(&count).Error
+	err := r.db.Model(&models.LangChainLLM{}).
+		Where(filter.Where, filter.WhereArgs...).
+		Count(&count).
+		Error
 	return count, err
 }
 
