@@ -194,6 +194,16 @@ func (h *Handlers) AskAI(c *fiber.Ctx) error {
 
 	payload.Message = messsage
 
+	user := h.GetUser(c)
+	if user == nil {
+		return &fiber.Error{
+			Code:    400,
+			Message: "user not found",
+		}
+	}
+
+	h.System.Logger.Info().Msgf("User %s is asking AI", user.Name)
+
 	if !payload.Stream {
 		response := askAIPrompting(
 			nil,
