@@ -52,3 +52,20 @@ func toSnakeCase(str string) string {
 	}
 	return strings.ToLower(string(result))
 }
+
+func TrimPromptResultJson(result string) string {
+	outcome := result
+
+	isFirstCharOpenCurlyBracket := outcome[0] == '{'
+	isLastCharCloseCurlyBracket := outcome[len(outcome)-1] == '}'
+
+	if !isFirstCharOpenCurlyBracket {
+		outcome = outcome[strings.Index(outcome, "{"):]
+	}
+
+	if !isLastCharCloseCurlyBracket {
+		outcome = outcome[:strings.LastIndex(outcome, "}")+1]
+	}
+
+	return outcome
+}
