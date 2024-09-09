@@ -1,10 +1,25 @@
 import { ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { toastValidation } from "@lib/utils";
+
 import { Models } from "@schemas/models";
+
+import * as modelsService from "@services/models";
 
 import * as queries from "@hooks/queries";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@components/ui/alert-dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -82,6 +97,14 @@ function ShowModelPage({ data }: { data: Models }) {
     navigate("/dashboard/models");
   }
 
+  function deleteModel() {
+    toastValidation(modelsService.remove(data.id), {
+      success() {
+        goBack();
+      },
+    });
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-[59rem] flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
@@ -105,10 +128,25 @@ function ShowModelPage({ data }: { data: Models }) {
             <CardDescription>If you delete this model, all associated data will be lost.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div></div>
-            <Button size="sm" variant="destructive">
-              Delete Model
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive">
+                  Delete Model
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the model and remove it from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={deleteModel}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       </ShowModel>
