@@ -20,7 +20,7 @@ type PPATP struct {
 	DebtorClassification string `json:"debtor_classification"`
 	EmploymentStatus     string `json:"employment_status"`
 	BusinessField        string `json:"business_field"`
-	EmploymentLength     string `json:"employment_length"`
+	EmploymentLength     int    `json:"employment_length"`
 	SourceOfFunds        string `json:"source_of_funds"`
 	IncomeRange          string `json:"income_range"`
 	MonthlyIncome        int    `json:"monthly_income"`
@@ -72,12 +72,12 @@ func (p *PPATPTemplates) GenContent(content ...llms.MessageContent) []llms.Messa
 		Gender:               "laki-laki",
 		MaritalStatus:        "menikah",
 		IsStaffBank:          false,
-		CustomerIdentifier:   "123456",
+		CustomerIdentifier:   "KTP",
 		Citizenship:          "WNI",
 		DebtorClassification: "A",
 		EmploymentStatus:     "Karyawan",
 		BusinessField:        "IT",
-		EmploymentLength:     "1-3 tahun",
+		EmploymentLength:     5,
 		SourceOfFunds:        "Gaji",
 		IncomeRange:          "10-20 juta",
 		MonthlyIncome:        10000000,
@@ -88,7 +88,7 @@ func (p *PPATPTemplates) GenContent(content ...llms.MessageContent) []llms.Messa
 
 	exampleResponse := helper.Encode(PPATPResponse{
 		RiskLevel: "Rendah",
-		Reasoning: "Nasabah memiliki pekerjaan tetap dengan penghasilan yang stabil, dan pengeluaran yang terkontrol.",
+		Reasoning: "Nasabah memiliki pekerjaan tetap dengan penghasilan yang stabil dan pengeluaran yang terkontrol.",
 	})
 
 	message := make([]llms.MessageContent, 3)
