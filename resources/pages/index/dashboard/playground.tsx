@@ -97,6 +97,8 @@ export default function PlaygroundPage() {
       return;
     }
 
+    const currentChatHistory = [...chatHistory];
+
     setChatHistory((prevChatHistory) => [
       ...prevChatHistory,
       {
@@ -111,6 +113,7 @@ export default function PlaygroundPage() {
     playgroundService.prompt({
       payload: {
         model: model.model || "",
+        chat_history: currentChatHistory || [],
         message,
         temperature,
         topP,
