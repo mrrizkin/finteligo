@@ -15,19 +15,19 @@ func NewService(lc *langchain.LangChain) *Service {
 }
 
 func (s *Service) Prompt(payload *PromptPayload) error {
-	Messages := make([]llms.MessageContent, 0)
+	messages := make([]llms.MessageContent, 0)
 
 	for _, message := range payload.ChatHistory {
 		if message.Role == "assistant" {
 			content := strings.Join(message.Content, "\n")
-			Messages = append(Messages, llms.TextParts(llms.ChatMessageTypeAI, content))
+			messages = append(messages, llms.TextParts(llms.ChatMessageTypeAI, content))
 		} else if message.Role == "user" {
 			content := strings.Join(message.Content, "\n")
-			Messages = append(Messages, llms.TextParts(llms.ChatMessageTypeHuman, content))
+			messages = append(messages, llms.TextParts(llms.ChatMessageTypeHuman, content))
 		}
 	}
 
-	Messages = append(Messages, llms.TextParts(llms.ChatMessageTypeHuman, payload.Message))
+	messages = append(messages, llms.TextParts(llms.ChatMessageTypeHuman, payload.Message))
 
 	promptPayload := types.PromptPayload{
 		Role:        payload.Role,
@@ -35,15 +35,10 @@ func (s *Service) Prompt(payload *PromptPayload) error {
 		Temperature: payload.Temperature,
 		TopP:        payload.TopP,
 		TopK:        payload.TopK,
-		Messages:    Messages,
+		Messages:    messages,
 		StreamFunc:  payload.StreamFunc,
 		Channel:     payload.Channel,
 	}
-
-	// err := s.langchain.Prompt(payload.Token, promptPayload)
-	// if err != nil {
-	// 	return err
-	// }
 
 	err := s.langchain.ChatPrompt(payload.Token, promptPayload)
 	if err != nil {

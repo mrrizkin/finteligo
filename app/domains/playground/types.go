@@ -9,7 +9,13 @@ type Service struct {
 	langchain *langchain.LangChain
 }
 
+type ChatHistory struct {
+	Role    string   `json:"role"`
+	Content []string `json:"content"`
+}
+
 type PromptPayload struct {
 	types.PromptPayload
-	Token types.Token `json:"token"`
+	ChatHistory []ChatHistory `json:"chat_history"`
+	Token       types.Token   `json:"token"`
 }

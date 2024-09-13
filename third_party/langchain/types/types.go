@@ -24,20 +24,14 @@ type AddLLMParams struct {
 }
 
 type PromptPayload struct {
-	Role        string        `json:"role"`
-	Content     string        `json:"content"`
-	Temperature float64       `json:"temperature"`
-	TopP        float64       `json:"top_p"`
-	TopK        int           `json:"top_k"`
-	Message     string        `json:"message"`
-	ChatHistory []ChatHistory `json:"chat_history"`
-	Stream      bool          `json:"stream"`
+	Role        string  `json:"role"`
+	Content     string  `json:"content"`
+	Temperature float64 `json:"temperature"`
+	TopP        float64 `json:"top_p"`
+	TopK        int     `json:"top_k"`
+	Message     string  `json:"message"`
+	Stream      bool    `json:"stream"`
 	StreamFunc  *func(ctx context.Context, chunk []byte) error
 	Channel     chan string
 	Messages    []llms.MessageContent
-}
-
-type ChatHistory struct {
-	Role    string   `json:"role"`
-	Content []string `json:"content"`
 }
